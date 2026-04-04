@@ -1,9 +1,10 @@
-// @qrkit/core — public API
-// Protocol logic will be implemented here.
-// See packages/core/src/ for planned modules:
-//   types.ts, cbor.ts, urEncoding.ts, parseXpub.ts, deriveKeys.ts,
-//   ethereumAddress.ts, bitcoinAddress.ts,
-//   ethSignRequest.ts, btcSignRequest.ts,
-//   ethSignature.ts, btcSignature.ts,
-//   btcMessageVerification.ts,
-//   client.ts, session.ts
+// Types
+export type { ScannedUR, Chain, QRKitConfig, Account, EvmAccount } from "./types.js";
+export type { ParsedXpub, XpubType } from "./parseXpub.js";
+
+// Connection
+export { parseConnection } from "./parseConnection.js";
+
+// EVM signing
+export { buildEthSignRequestUR, buildEthSignRequestURParts } from "./eth/signRequest.js";
+export { parseEthSignature } from "./eth/signature.js";

@@ -7,4 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Initial EVM implementation: `parseConnection`, `buildEthSignRequestURParts`, `parseEthSignature`.
+- `QRKitConfig` with optional `chains` filter — omitting it tries all supported chains.
+
 [unreleased]: https://github.com/qrkit/qrkit/compare/HEAD...HEAD

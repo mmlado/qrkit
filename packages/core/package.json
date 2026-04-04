@@ -14,23 +14,36 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "example": "tsx examples/eth-flow.ts"
   },
   "dependencies": {
     "@ngraveio/bc-ur": "^1.1.13",
     "@noble/hashes": "^2.0.1",
     "@noble/secp256k1": "^3.0.0",
-    "@scure/base": "^2.0.0",
     "@scure/bip32": "^2.0.1",
     "cborg": "^4.5.8"
   },
+  "peerDependencies": {
+    "buffer": ">=6"
+  },
+  "peerDependenciesMeta": {
+    "buffer": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "eslint": "^10.2.0",
     "tsup": "^8.4.0",
+    "tsx": "^4.21.0",
     "typescript": "~5.9.3",
     "vitest": "^4.1.2"
   }

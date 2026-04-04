@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-qrkit is a TypeScript monorepo providing a generic QR connector library for airgapped wallet flows. It implements the ERC-4527 / UR / CBOR protocol stack used by Shell, Keystone, and similar hardware wallets — allowing web dApps to connect and sign transactions without any online wallet bridge.
+qrkit is a TypeScript monorepo providing a generic QR connector library for airgapped wallet flows. It is a **frontend library** — all packages are designed to run in the browser. It implements the ERC-4527 / UR / CBOR protocol stack used by Shell, Keystone, and similar hardware wallets — allowing web dApps to connect and sign transactions without any online wallet bridge.
 
 ## Package Layout
 
@@ -67,6 +67,32 @@ packages/<name>/
 
 All public exports must go through `src/index.ts`. Do not import across packages using relative paths — use the package name (`@qrkit/core`), which resolves via `workspace:*`.
 
+## Code Style
+
+### Import ordering
+
+Group and order imports in every file:
+
+1. Node built-ins (if any)
+2. External packages
+3. Internal packages (`@qrkit/*`)
+4. Relative imports — deepest first, then siblings, then parent
+
+Leave a blank line between each group.
+
+```ts
+// external
+import { decode } from "cborg";
+import { URDecoder } from "@ngraveio/bc-ur";
+
+// internal package
+import type { ScannedUR } from "@qrkit/core";
+
+// relative
+import { deriveEvmAccount } from "../eth/deriveAccount.js";
+import type { QRKitConfig } from "./types.js";
+```
+
 ## TypeScript Config
 
 The root `tsconfig.base.json` defines shared compiler options. Each package extends it and adds its own `outDir`, `rootDir`, and (for React packages) `jsx`. Key settings:
@@ -84,8 +110,7 @@ The core package implements:
 - **CBOR** — binary encoding used inside UR payloads. Uses `cborg`.
 - **crypto-hdkey / crypto-account** — UR types for exporting xpubs from a hardware wallet.
 - **eth-sign-request / eth-signature** — UR types for EVM signing flows (ERC-4527).
-- **btc-sign-request / btc-signature** — UR types for Bitcoin signing flows.
-- **HD key derivation** — derive EVM and Bitcoin addresses from exported xpubs. Uses `@scure/bip32`.
+- **HD key derivation** — derive EVM addresses from exported xpubs. Uses `@scure/bip32`.
 
 The prototype implementation at `../shell_dapp_prototype/src/lib/` is the reference for all protocol logic. When in doubt about encoding details, check those files first.
 
@@ -95,7 +120,7 @@ The prototype implementation at `../shell_dapp_prototype/src/lib/` is the refere
 - `@qrkit/react` must never import from `wagmi` or `viem`.
 - Session state is the responsibility of `@qrkit/core`. React and wagmi layers wrap it, they do not reimplement it.
 - All QR parts (animated or single-frame) are represented as `string[]` in the core layer. Rendering is the responsibility of the React layer.
-- Signature verification for Bitcoin messages is done in `@qrkit/core`, not in the React layer.
+- Bitcoin support is not in scope yet. When it is added, all BTC-specific logic (sign requests, signature parsing, address derivation, message verification) must live in dedicated files (e.g. `btcSignRequest.ts`, `btcSignature.ts`) and must not bleed into EVM files, tests, or types. BTC and EVM code paths must remain clearly separated at all times.
 
 ## Changelogs
 
@@ -113,6 +138,17 @@ Each package has its own `CHANGELOG.md` following [Keep a Changelog](https://kee
 - Tests use Vitest. No test framework globals — import from `vitest` explicitly.
 - `@qrkit/core` tests should cover all protocol encode/decode paths with known-good UR fixtures.
 - Do not mock the UR codec or CBOR parser in core tests — use real encoded payloads.
+
+## Finishing a Task
+
+When the user says **"finish"**, do the following in order:
+
+1. **Add missing tests** — cover any new or changed behaviour not yet tested.
+2. **Lint** — run `pnpm lint` and fix all errors.
+3. **Format** — run `pnpm format` and apply changes.
+4. **Run all tests** — run `pnpm test` and confirm everything passes.
+5. **Update changelogs** — add an entry to the relevant package `CHANGELOG.md` under `## [Unreleased]` describing what changed. Follow the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) `Added / Changed / Fixed / Removed` format.
+6. **Update AGENTS.md** — if anything was added, changed, or decided that is non-obvious and useful for future sessions (new invariants, new conventions, architectural decisions), add it here.
 
 ## References
 

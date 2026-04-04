@@ -1,5 +1,13 @@
 # qrkit
 
+[![CI](https://github.com/mmlado/qrkit/actions/workflows/ci.yml/badge.svg)](https://github.com/mmlado/qrkit/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![pnpm](https://img.shields.io/badge/pnpm-9-f69220?logo=pnpm&logoColor=white)](https://pnpm.io/)
+[![npm @qrkit/core](https://img.shields.io/npm/v/@qrkit/core?label=%40qrkit%2Fcore)](https://www.npmjs.com/package/@qrkit/core)
+[![npm @qrkit/react](https://img.shields.io/npm/v/@qrkit/react?label=%40qrkit%2Freact)](https://www.npmjs.com/package/@qrkit/react)
+[![npm @qrkit/wagmi](https://img.shields.io/npm/v/@qrkit/wagmi?label=%40qrkit%2Fwagmi)](https://www.npmjs.com/package/@qrkit/wagmi)
+
 Generic QR connector for airgapped wallet flows.
 
 A reusable library for QR-based, airgapped wallet connection and signing flows. Built around [ERC-4527](https://eips.ethereum.org/EIPS/eip-4527) / UR / CBOR — the same protocol used by Keystone and Shell hardware wallets.
@@ -48,13 +56,21 @@ const config = createConfig({
 ### Core only
 
 ```ts
-import { createClient, parseSignatureResponse } from '@qrkit/core'
+import {
+  parseConnection,
+  buildEthSignRequestURParts,
+  parseEthSignature,
+} from '@qrkit/core'
 
-const client = createClient({ appName: 'My dApp', chains: ['evm'] })
-const session = await client.createSession(scannedUR)
-const request = await client.signMessage(session, { accountId, message })
-// render request.qrParts as QR codes
-const result = await parseSignatureResponse(session, request, scannedResponseUR)
+// Parse a connection QR from the wallet
+const accounts = parseConnection(scannedUR, { chains: ['evm'] })
+const account = accounts.find(a => a.chain === 'evm')
+
+// Build a sign request — render parts as QR codes
+const parts = buildEthSignRequestURParts(message, account.address, account.sourceFingerprint)
+
+// Parse the wallet's signature response
+const signature = parseEthSignature(scannedResponseUR)
 ```
 
 ## Development
