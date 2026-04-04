@@ -1,0 +1,37 @@
+{
+  "name": "@qrkit/core",
+  "version": "0.0.0",
+  "description": "Protocol core for QR-based airgapped wallet flows — UR decoding, xpub parsing, address derivation, sign request and signature handling.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ngraveio/bc-ur": "^1.1.13",
+    "@noble/hashes": "^2.0.1",
+    "@noble/secp256k1": "^3.0.0",
+    "@scure/base": "^2.0.0",
+    "@scure/bip32": "^2.0.1",
+    "cborg": "^4.5.8"
+  },
+  "devDependencies": {
+    "tsup": "^8.4.0",
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.2"
+  }
+}

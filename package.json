@@ -1,0 +1,21 @@
+{
+  "name": "qrkit",
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "test": "turbo test",
+    "typecheck": "turbo typecheck",
+    "lint": "turbo lint",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "turbo build && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.12",
+    "turbo": "^2.4.4",
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.2"
+  },
+  "packageManager": "pnpm@9.15.9"
+}
