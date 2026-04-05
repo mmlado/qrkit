@@ -11,7 +11,7 @@
  *   4. Parse a simulated eth-signature response
  */
 
-import { URDecoder } from "@ngraveio/bc-ur";
+import { UrFountainDecoder } from "@qrkit/bc-ur";
 import {
   parseConnection,
   buildEthSignRequestURParts,
@@ -27,11 +27,11 @@ import type { EvmAccount } from "../src/index.js";
 const ETH_HDKEY_UR =
   "ur:crypto-hdkey/osaowkaxhdclaojyhdtidmwprpltktftfefxmymottrfndlbiofwehbdgsbwgeglkstsembgkklfgsaahdcxghnbrsbzylkeiyuecfmwnlbggwhtkownwdeylahgjsykwshecxmhamsfecvtdeyaamtaaddyotadlncsdwykcsfnykaeykaocyiscmcyceaxaxaycylebgmkbzasjngrihkkiahsjpiecxguisihjzjzbkjohsiaiajlkpjtjydmjkjyhsjtiehsjpiefrcntszm";
 
-const decoder = new URDecoder();
-decoder.receivePart(ETH_HDKEY_UR);
+const decoder = new UrFountainDecoder();
+decoder.receivePartUr(ETH_HDKEY_UR);
 const scannedUR = {
-  type: decoder.resultUR().type,
-  cbor: new Uint8Array(decoder.resultUR().cbor),
+  type: decoder.resultUr.type,
+  cbor: decoder.resultUr.getPayloadCbor(),
 };
 
 console.log("── Connection QR ─────────────────────────────────────────────");
