@@ -1,6 +1,6 @@
 {
   "name": "@qrkit/wagmi",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "wagmi connector adapter for QR-based airgapped wallet flows.",
   "license": "Apache-2.0",
   "type": "module",
@@ -14,7 +14,9 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
