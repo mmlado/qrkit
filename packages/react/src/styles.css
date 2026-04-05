@@ -1,0 +1,200 @@
+/* QRKit default styles — all scoped under .qrkit */
+
+.qrkit {
+  /* MD3 light scheme */
+  --qrkit-accent: #6750a4;
+  --qrkit-bg: #fffbfe;
+  --qrkit-backdrop: rgba(0, 0, 0, 0.6);
+  --qrkit-text: #1c1b1f;
+  --qrkit-text-muted: #49454f;
+  --qrkit-radius: 12px;
+  --qrkit-font: inherit;
+}
+
+@media (prefers-color-scheme: dark) {
+  .qrkit {
+    /* MD3 dark scheme */
+    --qrkit-accent: #d0bcff;
+    --qrkit-bg: #1c1b1f;
+    --qrkit-backdrop: rgba(0, 0, 0, 0.75);
+    --qrkit-text: #e6e1e5;
+    --qrkit-text-muted: #cac4d0;
+  }
+}
+
+/* ── Backdrop ─────────────────────────────────────── */
+
+.qrkit-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--qrkit-backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  font-family: var(--qrkit-font);
+}
+
+/* ── Modal ────────────────────────────────────────── */
+
+.qrkit-modal {
+  background: var(--qrkit-bg);
+  color: var(--qrkit-text);
+  border-radius: var(--qrkit-radius);
+  padding: 28px 24px 24px;
+  width: 100%;
+  max-width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.qrkit-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.qrkit-modal-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--qrkit-text);
+}
+
+.qrkit-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--qrkit-text-muted);
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qrkit-close-btn:hover {
+  color: var(--qrkit-text);
+}
+
+/* ── Scanner ──────────────────────────────────────── */
+
+.qrkit-scanner-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: calc(var(--qrkit-radius) - 4px);
+  overflow: hidden;
+  background: #000;
+}
+
+.qrkit-scanner-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.qrkit-scanner-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.qrkit-scanner-corner {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-color: var(--qrkit-accent);
+  border-style: solid;
+}
+
+.qrkit-scanner-corner.tl { top: 12px; left: 12px; border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
+.qrkit-scanner-corner.tr { top: 12px; right: 12px; border-width: 3px 3px 0 0; border-radius: 0 4px 0 0; }
+.qrkit-scanner-corner.bl { bottom: 12px; left: 12px; border-width: 0 0 3px 3px; border-radius: 0 0 0 4px; }
+.qrkit-scanner-corner.br { bottom: 12px; right: 12px; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
+
+.qrkit-scanner-progress {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.qrkit-scanner-error {
+  color: #c00;
+  font-size: 14px;
+  text-align: center;
+}
+
+.qrkit-hint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--qrkit-text-muted);
+  text-align: center;
+}
+
+/* ── QR Display ───────────────────────────────────── */
+
+.qrkit-qr-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.qrkit-qr-canvas {
+  border-radius: calc(var(--qrkit-radius) - 4px);
+  display: block;
+}
+
+/* ── Buttons ──────────────────────────────────────── */
+
+.qrkit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border-radius: calc(var(--qrkit-radius) - 4px);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s;
+  width: 100%;
+}
+
+.qrkit-btn:hover {
+  opacity: 0.85;
+}
+
+.qrkit-btn-primary {
+  background: var(--qrkit-accent);
+  color: #fff;
+}
+
+.qrkit-btn-ghost {
+  background: transparent;
+  color: var(--qrkit-text-muted);
+  border: 1px solid currentColor;
+}
+
+/* ── Step label ───────────────────────────────────── */
+
+.qrkit-step {
+  font-size: 13px;
+  color: var(--qrkit-text-muted);
+  text-align: center;
+  margin: 0;
+}

@@ -32,14 +32,74 @@ The core package can be used in any environment. The React and wagmi packages ar
 
 ## Quick Start
 
-### React
+### React — drop-in components
+
+Wrap your app in `QRKitProvider`. Call `connect()` and `sign()` from anywhere — modals appear automatically.
 
 ```tsx
-import { QRKitProvider } from '@qrkit/react'
+import { QRKitProvider, useQRKit } from '@qrkit/react'
+import '@qrkit/react/styles.css'
 
-<QRKitProvider config={{ appName: 'My dApp', chains: ['evm'] }}>
-  <App />
-</QRKitProvider>
+export function App() {
+  return (
+    <QRKitProvider appName="My dApp">
+      <Wallet />
+    </QRKitProvider>
+  )
+}
+
+function Wallet() {
+  const { account, connect, disconnect, sign } = useQRKit()
+
+  async function handleSign() {
+    if (!account) return
+    const sig = await sign({
+      message: 'Hello from My dApp',
+      address: account.address,
+      sourceFingerprint: account.chain === 'evm' ? account.sourceFingerprint : undefined,
+    })
+    console.log('Signature:', sig)
+  }
+
+  if (!account) return <button onClick={connect}>Connect wallet</button>
+
+  return (
+    <div>
+      <p>{account.address}</p>
+      <button onClick={handleSign}>Sign message</button>
+      <button onClick={disconnect}>Disconnect</button>
+    </div>
+  )
+}
+```
+
+Styles follow Material Design 3 and adapt to light/dark system preference automatically. Override with CSS variables:
+
+```css
+.qrkit {
+  --qrkit-accent: #ff6b00;
+  --qrkit-radius: 8px;
+}
+```
+
+Or via the `theme` prop:
+
+```tsx
+<QRKitProvider appName="My dApp" theme={{ accent: '#ff6b00' }}>
+```
+
+### React — low-level hooks
+
+For custom layouts, use `useQRScanner` and `useQRDisplay` directly. To plug in your own scanning or rendering library, use `useURDecoder` and `useQRParts`:
+
+```tsx
+import { useURDecoder, useQRParts } from '@qrkit/react'
+
+// Feed raw QR strings from any scanner
+const { receivePart, progress } = useURDecoder({ onScan })
+
+// Get the current frame string for any renderer
+const { part, frame, total } = useQRParts({ parts })
 ```
 
 ### wagmi
