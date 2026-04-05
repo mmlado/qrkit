@@ -20,6 +20,16 @@ export function App() {
         <p style={{ marginBottom: "2rem", opacity: 0.6 }}>
           Airgapped wallet connection via QR codes
         </p>
+        <p style={{ marginBottom: "2rem", fontSize: "0.85rem", opacity: 0.4 }}>
+          <a
+            href="https://github.com/mmlado/qrkit"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "inherit" }}
+          >
+            github.com/mmlado/qrkit
+          </a>
+        </p>
         <Wallet />
       </main>
     </QRKitProvider>
