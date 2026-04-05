@@ -8,7 +8,7 @@
 [![npm @qrkit/react](https://img.shields.io/npm/v/@qrkit/react?label=%40qrkit%2Freact)](https://www.npmjs.com/package/@qrkit/react)
 [![npm @qrkit/wagmi](https://img.shields.io/npm/v/@qrkit/wagmi?label=%40qrkit%2Fwagmi)](https://www.npmjs.com/package/@qrkit/wagmi)
 
-Generic QR connector for airgapped wallet flows. **[Live demo →](https://qrkit-react-ouhcro35m-mladen-milankovics-projects.vercel.app/)**
+Generic QR connector for airgapped wallet flows. **[Live demo →](https://qrkit-react.vercel.app/)**
 
 A reusable library for QR-based, airgapped wallet connection and signing flows. Built around [ERC-4527](https://eips.ethereum.org/EIPS/eip-4527) / UR / CBOR — the same protocol used by Keystone and Shell hardware wallets.
 
