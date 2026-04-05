@@ -1,5 +1,5 @@
 import { encode, CborTag } from "../cbor.js";
-import { encodeURFirstPart, encodeURParts } from "../urEncoding.js";
+import { encodeURParts } from "../urEncoding.js";
 
 // EIP-191 personal_sign = eth-raw-bytes (ERC-4527 data type 3)
 const DATA_TYPE_ETH_RAW_BYTES = 3;
@@ -70,8 +70,8 @@ export function buildEthSignRequestUR(
   sourceFingerprint: number | undefined,
   origin?: string,
 ): string {
-  return encodeURFirstPart(
+  return encodeURParts(
     buildEthSignRequestCbor(message, address, sourceFingerprint, origin),
     "eth-sign-request",
-  );
+  )[0];
 }

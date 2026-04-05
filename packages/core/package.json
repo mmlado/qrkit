@@ -26,19 +26,11 @@
     "example": "tsx examples/eth-flow.ts"
   },
   "dependencies": {
-    "@ngraveio/bc-ur": "^1.1.13",
+    "@qrkit/bc-ur": "2.0.0-beta.9-qrkit.2",
     "@noble/hashes": "^2.0.1",
     "@noble/secp256k1": "^3.0.0",
     "@scure/bip32": "^2.0.1",
     "cborg": "^4.5.8"
-  },
-  "peerDependencies": {
-    "buffer": ">=6"
-  },
-  "peerDependenciesMeta": {
-    "buffer": {
-      "optional": true
-    }
   },
   "devDependencies": {
     "eslint": "^10.2.0",

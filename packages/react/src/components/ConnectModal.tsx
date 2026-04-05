@@ -29,8 +29,8 @@ export function ConnectModal({ onConnect, onClose }: ConnectModalProps) {
   return (
     <Modal title="Connect Wallet" onClose={onClose}>
       <p className="qrkit-step">
-        On your hardware wallet, go to <strong>Connect software wallet</strong> and point the
-        screen at this camera.
+        On your hardware wallet, go to <strong>Connect software wallet</strong> and point
+        the screen at this camera.
       </p>
       <QRScanner onScan={handleScan} hint="Scan the wallet's connection QR code" />
     </Modal>

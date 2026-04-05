@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 
-import { URDecoder } from "@ngraveio/bc-ur";
+import { UrFountainDecoder } from "@qrkit/bc-ur";
 
 import type { ScannedUR } from "@qrkit/core";
 
@@ -22,14 +22,14 @@ export interface UseURDecoderResult {
 }
 
 export function useURDecoder({ onScan }: UseURDecoderOptions): UseURDecoderResult {
-  const decoderRef = useRef<URDecoder>(new URDecoder());
+  const decoderRef = useRef<UrFountainDecoder>(new UrFountainDecoder());
   const onScanRef = useRef(onScan);
   const [progress, setProgress] = useState<number | null>(null);
 
   onScanRef.current = onScan;
 
   const reset = useCallback(() => {
-    decoderRef.current = new URDecoder();
+    decoderRef.current = new UrFountainDecoder();
     setProgress(null);
   }, []);
 
@@ -39,13 +39,13 @@ export function useURDecoder({ onScan }: UseURDecoderOptions): UseURDecoderResul
         return onScanRef.current(data) !== false;
       }
 
-      decoderRef.current.receivePart(data.toLowerCase());
+      decoderRef.current.receivePartUr(data.toLowerCase());
       setProgress(Math.round(decoderRef.current.estimatedPercentComplete() * 100));
 
       if (!decoderRef.current.isComplete()) return false;
 
-      const ur = decoderRef.current.resultUR();
-      const scanned: ScannedUR = { type: ur.type, cbor: new Uint8Array(ur.cbor) };
+      const ur = decoderRef.current.resultUr;
+      const scanned: ScannedUR = { type: ur.type, cbor: ur.getPayloadCbor() };
       if (onScanRef.current(scanned) !== false) return true;
 
       reset();

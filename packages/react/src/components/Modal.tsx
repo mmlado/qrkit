@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import type React from "react";
 
 import { createFocusTrap } from "focus-trap";
 
@@ -16,14 +17,15 @@ export function Modal({ title, onClose, children, className }: ModalProps) {
     const el = containerRef.current;
     const trap = el
       ? createFocusTrap(el, {
-          escapeDeactivates: true,
-          onDeactivate: onClose,
+          escapeDeactivates: false,
           allowOutsideClick: true,
         })
       : null;
 
     trap?.activate();
-    return () => { trap?.deactivate(); };
+    return () => {
+      trap?.deactivate();
+    };
   }, [onClose]);
 
   useEffect(() => {
@@ -35,7 +37,12 @@ export function Modal({ title, onClose, children, className }: ModalProps) {
   }, [onClose]);
 
   return (
-    <div className="qrkit qrkit-backdrop" onClick={onClose} role="dialog" aria-modal="true">
+    <div
+      className="qrkit qrkit-backdrop"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
       <div
         ref={containerRef}
         className={`qrkit-modal${className ? ` ${className}` : ""}`}

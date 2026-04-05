@@ -13,7 +13,11 @@ export function QRScanner({ onScan, hint, enabled = true, className }: QRScanner
   const { videoRef, progress, error } = useQRScanner({ onScan, enabled });
 
   if (error) {
-    return <div className={`qrkit-scanner-error${className ? ` ${className}` : ""}`}>{error}</div>;
+    return (
+      <div className={`qrkit-scanner-error${className ? ` ${className}` : ""}`}>
+        {error}
+      </div>
+    );
   }
 
   return (
@@ -28,7 +32,10 @@ export function QRScanner({ onScan, hint, enabled = true, className }: QRScanner
       {progress !== null && progress < 100 && (
         <div className="qrkit-scanner-progress">{progress}%</div>
       )}
-      <p className="qrkit-hint" style={{ position: "absolute", bottom: 8, left: 0, right: 0 }}>
+      <p
+        className="qrkit-hint"
+        style={{ position: "absolute", bottom: 8, left: 0, right: 0 }}
+      >
         {progress !== null && progress < 100
           ? "Keep scanning — animated QR in progress…"
           : (hint ?? "Point camera at the QR code")}

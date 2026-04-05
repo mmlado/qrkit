@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { createPortal } from "react-dom";
 
@@ -6,7 +14,12 @@ import type { Account } from "@qrkit/core";
 
 import { ConnectModal } from "./components/ConnectModal.js";
 import { SignModal } from "./components/SignModal.js";
-import type { QRKitContextValue, QRKitProviderProps, QRKitTheme, SignRequest } from "./types.js";
+import type {
+  QRKitContextValue,
+  QRKitProviderProps,
+  QRKitTheme,
+  SignRequest,
+} from "./types.js";
 
 const QRKitContext = createContext<QRKitContextValue | null>(null);
 
@@ -35,7 +48,11 @@ interface PendingSign {
   reject: (err: Error) => void;
 }
 
-export function QRKitProvider({ children, theme = {}, appName = "qrkit" }: QRKitProviderProps) {
+export function QRKitProvider({
+  children,
+  theme = {},
+  appName = "qrkit",
+}: QRKitProviderProps) {
   const [account, setAccount] = useState<Account | null>(null);
   const [connectOpen, setConnectOpen] = useState(false);
   const [pendingSign, setPendingSign] = useState<PendingSign | null>(null);
@@ -90,7 +107,10 @@ export function QRKitProvider({ children, theme = {}, appName = "qrkit" }: QRKit
       {children}
       {connectOpen &&
         createPortal(
-          <ConnectModal onConnect={handleConnect} onClose={() => setConnectOpen(false)} />,
+          <ConnectModal
+            onConnect={handleConnect}
+            onClose={() => setConnectOpen(false)}
+          />,
           document.body,
         )}
       {pendingSign &&

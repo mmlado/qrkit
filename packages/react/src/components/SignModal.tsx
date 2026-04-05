@@ -65,7 +65,10 @@ export function SignModal({ request, appName, onSign, onReject }: SignModalProps
             On your hardware wallet, show the signature QR and point it at this camera.
           </p>
           <QRScanner onScan={handleScan} hint="Scan the wallet's signature QR code" />
-          <button className="qrkit-btn qrkit-btn-ghost" onClick={() => setStep("display")}>
+          <button
+            className="qrkit-btn qrkit-btn-ghost"
+            onClick={() => setStep("display")}
+          >
             ← Back
           </button>
         </>

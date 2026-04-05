@@ -34,31 +34,44 @@ export function useQRScanner({
 
   const { receivePart, progress } = useURDecoder({ onScan });
 
+  const receivePartRef = useRef(receivePart);
+  receivePartRef.current = receivePart;
+
   const processFrame = useCallback((): void => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     if (!video || !canvas || doneRef.current) return;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return;
 
     if (video.readyState === video.HAVE_ENOUGH_DATA) {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       ctx.drawImage(video, 0, 0);
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const code = jsQR(imageData.data, imageData.width, imageData.height);
-      if (code) {
-        const done = receivePart(code.data);
-        if (done) {
-          doneRef.current = true;
-          return;
+      let imageData: ImageData;
+      try {
+        imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      } catch {
+        setError(
+          "Canvas access blocked. Disable fingerprinting protection for this site to scan QR codes.",
+        );
+        return;
+      }
+      {
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+        if (code) {
+          const done = receivePartRef.current(code.data);
+          if (done) {
+            doneRef.current = true;
+            return;
+          }
         }
       }
     }
 
     rafRef.current = requestAnimationFrame(processFrame);
-  }, [receivePart]);
+  }, []);
 
   useEffect(() => {
     if (!enabled || !videoRef.current) return;

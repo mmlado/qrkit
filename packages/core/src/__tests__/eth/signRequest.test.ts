@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { decode, type TagDecoder } from "cborg";
-import { URDecoder } from "@ngraveio/bc-ur";
+import { UrFountainDecoder } from "@qrkit/bc-ur";
 
 import {
   buildEthSignRequestUR,
@@ -9,12 +9,12 @@ import {
 import { ETH_ADDRESS, SOURCE_FINGERPRINT } from "../fixtures.js";
 
 function decodeSignRequestUR(ur: string) {
-  const decoder = new URDecoder();
-  decoder.receivePart(ur.toLowerCase());
-  const result = decoder.resultUR();
+  const decoder = new UrFountainDecoder();
+  decoder.receivePartUr(ur.toLowerCase());
+  const result = decoder.resultUr;
   return {
     type: result.type,
-    map: decode(new Uint8Array(result.cbor), {
+    map: decode(result.getPayloadCbor(), {
       useMaps: true,
       tags: Object.assign([] as TagDecoder[], {
         37: (v: unknown) => v,
@@ -73,10 +73,10 @@ describe("buildEthSignRequestUR", () => {
   });
 
   it("wraps request-id in CBOR tag 37 (UUID)", () => {
-    const decoder = new URDecoder();
+    const decoder = new UrFountainDecoder();
     const ur = buildEthSignRequestUR("Hello", ETH_ADDRESS, SOURCE_FINGERPRINT);
-    decoder.receivePart(ur.toLowerCase());
-    const hex = [...new Uint8Array(decoder.resultUR().cbor)]
+    decoder.receivePartUr(ur.toLowerCase());
+    const hex = [...decoder.resultUr.getPayloadCbor()]
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
     expect(hex).toContain("d825"); // tag(37)
@@ -113,11 +113,11 @@ describe("buildEthSignRequestURParts", () => {
       ETH_ADDRESS,
       SOURCE_FINGERPRINT,
     );
-    const decoder = new URDecoder();
+    const decoder = new UrFountainDecoder();
     for (const part of parts) {
-      decoder.receivePart(part.toLowerCase());
+      decoder.receivePartUr(part.toLowerCase());
     }
     expect(decoder.isComplete()).toBe(true);
-    expect(decoder.resultUR().type).toBe("eth-sign-request");
+    expect(decoder.resultUr.type).toBe("eth-sign-request");
   });
 });

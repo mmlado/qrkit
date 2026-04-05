@@ -26,7 +26,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@ngraveio/bc-ur": "^1.1.11",
+    "@qrkit/bc-ur": "2.0.0-beta.9-qrkit.2",
     "@qrkit/core": "workspace:*",
     "focus-trap": "^8.0.1",
     "jsqr": "^1.4.0",
