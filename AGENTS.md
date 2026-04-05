@@ -123,7 +123,7 @@ The prototype implementation at `../shell_dapp_prototype/src/lib/` is the refere
 - Bitcoin support is not in scope yet. When it is added, all BTC-specific logic (sign requests, signature parsing, address derivation, message verification) must live in dedicated files (e.g. `btcSignRequest.ts`, `btcSignature.ts`) and must not bleed into EVM files, tests, or types. BTC and EVM code paths must remain clearly separated at all times.
 - `QRKitProvider` renders no wrapper DOM elements — modals portal into `document.body`, theme variables inject a `<style>` tag into `<head>`.
 - Scanning and rendering are split into two layers: batteries-included (`useQRScanner`, `useQRDisplay`) and primitive (`useURDecoder`, `useQRParts`). The primitives accept/emit raw strings and are scanner/renderer agnostic.
-- UI dependencies: `qr-scanner` for camera scanning, `qrcode` for canvas rendering, `focus-trap` for modal accessibility. Do not pull in full UI frameworks.
+- UI dependencies: `jsqr` for camera scanning (pure JS, no WASM — works in browser extensions and service workers), `qrcode` for canvas rendering, `focus-trap` for modal accessibility. Do not pull in full UI frameworks.
 - Default styles follow Material Design 3 tokens and support automatic light/dark via `prefers-color-scheme`. Theme overrides use CSS custom properties via a `<style>` tag injected by `QRKitProvider`.
 
 ## Changelogs

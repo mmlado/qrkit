@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import QrScanner from "qr-scanner";
+import jsQR from "jsqr";
 
 import type { ScannedUR } from "@qrkit/core";
 
@@ -27,44 +27,67 @@ export function useQRScanner({
   enabled = true,
 }: UseQRScannerOptions): UseQRScannerResult {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const scannerRef = useRef<QrScanner | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const doneRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
 
   const { receivePart, progress } = useURDecoder({ onScan });
 
-  const processResult = useCallback(
-    (data: string, scanner: QrScanner): void => {
-      const done = receivePart(data);
-      if (done) scanner.stop();
-    },
-    [receivePart],
-  );
+  const processFrame = useCallback((): void => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas || doneRef.current) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height);
+      if (code) {
+        const done = receivePart(code.data);
+        if (done) {
+          doneRef.current = true;
+          return;
+        }
+      }
+    }
+
+    rafRef.current = requestAnimationFrame(processFrame);
+  }, [receivePart]);
 
   useEffect(() => {
     if (!enabled || !videoRef.current) return;
 
-    const scanner = new QrScanner(
-      videoRef.current,
-      (result) => processResult(result.data, scanner),
-      {
-        preferredCamera: "environment",
-        highlightScanRegion: false,
-        highlightCodeOutline: false,
-      },
-    );
+    doneRef.current = false;
+    canvasRef.current = document.createElement("canvas");
 
-    scannerRef.current = scanner;
+    let stream: MediaStream | null = null;
 
-    scanner.start().catch(() => {
-      setError("Camera access denied. Please allow camera permissions.");
-    });
+    navigator.mediaDevices
+      .getUserMedia({ video: { facingMode: "environment" } })
+      .then((s) => {
+        stream = s;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play().catch(() => {});
+          rafRef.current = requestAnimationFrame(processFrame);
+        }
+      })
+      .catch(() => {
+        setError("Camera access denied. Please allow camera permissions.");
+      });
 
     return () => {
-      scanner.stop();
-      scanner.destroy();
-      scannerRef.current = null;
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      stream?.getTracks().forEach((t) => t.stop());
+      canvasRef.current = null;
     };
-  }, [enabled, processResult]);
+  }, [enabled, processFrame]);
 
   return { videoRef, progress, error };
 }

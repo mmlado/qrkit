@@ -29,7 +29,7 @@
     "@ngraveio/bc-ur": "^1.1.11",
     "@qrkit/core": "workspace:*",
     "focus-trap": "^8.0.1",
-    "qr-scanner": "^1.4.2",
+    "jsqr": "^1.4.0",
     "qrcode": "^1.5.4"
   },
   "peerDependencies": {
