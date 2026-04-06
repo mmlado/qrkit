@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0
+
+### Minor Changes
+
+- Update `SignRequest` interface: rename `message` to `signData` (`Uint8Array | string`), add optional `dataType` and `chainId` fields to support all ERC-4527 data types.
+
+### Patch Changes
+
+- Updated dependencies
+  - @qrkit/core@0.3.0
+
 ## 0.2.0
 
 ### Minor Changes

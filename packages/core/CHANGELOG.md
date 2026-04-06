@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0
+
+### Minor Changes
+
+- Refactor `buildEthSignRequestURParts` and `buildEthSignRequestUR` to accept a params object (`EthSignRequestParams`) instead of positional arguments. Adds `EthDataType` constants, `dataType` field (defaults to `PersonalMessage`), `chainId` support, and `signData` accepting raw `Uint8Array` in addition to strings. The `SignRequest` interface in `@qrkit/react` is updated accordingly.
+
 ## 0.2.0
 
 ### Minor Changes
