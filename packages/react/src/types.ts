@@ -18,9 +18,20 @@ export interface QRKitTheme {
 }
 
 export interface SignRequest {
-  message: string;
+  /**
+   * Data to sign. For PersonalMessage (type 3), a plain string is accepted and
+   * UTF-8-encoded automatically. For transactions and typed data, pass raw bytes.
+   */
+  signData: Uint8Array | string;
+  /**
+   * ERC-4527 data type. Defaults to PersonalMessage (3 — EIP-191 personal_sign).
+   * Use EthDataType constants from @qrkit/core.
+   */
+  dataType?: number;
   address: string;
   sourceFingerprint: number | undefined;
+  /** Chain ID — required for LegacyTransaction (type 1) v-value encoding. */
+  chainId?: number;
 }
 
 export interface QRKitContextValue {

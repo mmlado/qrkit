@@ -32,14 +32,23 @@ account.sourceFingerprint // master key fingerprint — required for signing
 Encode a message as animated UR parts to display as a QR code for the wallet to scan:
 
 ```ts
-import { buildEthSignRequestURParts, buildEthSignRequestUR } from '@qrkit/core'
+import { buildEthSignRequestURParts, buildEthSignRequestUR, EthDataType } from '@qrkit/core'
 
 // Animated QR (multiple parts for long messages)
-const parts = buildEthSignRequestURParts(message, account.address, account.sourceFingerprint)
+const parts = buildEthSignRequestURParts({
+  signData: message,            // string (UTF-8 encoded) or Uint8Array (raw bytes)
+  dataType: EthDataType.PersonalMessage, // defaults to PersonalMessage if omitted
+  address: account.address,
+  sourceFingerprint: account.sourceFingerprint,
+})
 // parts is string[] — cycle through them to animate the QR
 
 // Single-frame QR (short messages)
-const ur = buildEthSignRequestUR(message, account.address, account.sourceFingerprint)
+const ur = buildEthSignRequestUR({
+  signData: message,
+  address: account.address,
+  sourceFingerprint: account.sourceFingerprint,
+})
 ```
 
 ### 3. Parse the wallet's signature response
@@ -58,8 +67,9 @@ const signature = parseEthSignature(scannedResponseUR)
 | Export | Description |
 |---|---|
 | `parseConnection(ur, options)` | Parse a `crypto-hdkey` or `crypto-account` UR into `Account[]` |
-| `buildEthSignRequestURParts(message, address, fingerprint)` | Build animated UR parts for an EIP-191 sign request |
-| `buildEthSignRequestUR(message, address, fingerprint)` | Build a single-frame UR for a sign request |
+| `buildEthSignRequestURParts(params)` | Build animated UR parts for a sign request (`EthSignRequestParams`) |
+| `buildEthSignRequestUR(params)` | Build a single-frame UR for a sign request (`EthSignRequestParams`) |
+| `EthDataType` | Constants for ERC-4527 data types (1–4) |
 | `parseEthSignature(ur)` | Decode an `eth-signature` UR into a `0x...` hex string |
 
 ## License

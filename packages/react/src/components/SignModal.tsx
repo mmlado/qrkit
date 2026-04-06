@@ -20,12 +20,14 @@ export interface SignModalProps {
 export function SignModal({ request, appName, onSign, onReject }: SignModalProps) {
   const [step, setStep] = useState<Step>("display");
 
-  const parts = buildEthSignRequestURParts(
-    request.message,
-    request.address,
-    request.sourceFingerprint,
-    appName,
-  );
+  const parts = buildEthSignRequestURParts({
+    signData: request.signData,
+    dataType: request.dataType,
+    address: request.address,
+    sourceFingerprint: request.sourceFingerprint,
+    chainId: request.chainId,
+    origin: appName,
+  });
 
   const handleScan = useCallback(
     (data: ScannedUR | string): boolean | void => {

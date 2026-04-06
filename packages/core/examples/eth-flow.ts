@@ -58,12 +58,12 @@ console.log("Source fingerprint:  ", "0x" + account.sourceFingerprint?.toString(
 // ── Step 3: Build sign request ────────────────────────────────────────────────
 
 const message = "Hello from qrkit!";
-const parts = buildEthSignRequestURParts(
-  message,
-  account.address,
-  account.sourceFingerprint,
-  "qrkit-example",
-);
+const parts = buildEthSignRequestURParts({
+  signData: message,
+  address: account.address,
+  sourceFingerprint: account.sourceFingerprint,
+  origin: "qrkit-example",
+});
 
 console.log("\n── Sign Request ──────────────────────────────────────────────");
 console.log("Message:             ", message);

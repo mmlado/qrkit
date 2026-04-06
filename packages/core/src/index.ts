@@ -6,5 +6,10 @@ export type { ParsedXpub, XpubType } from "./parseXpub.js";
 export { parseConnection } from "./parseConnection.js";
 
 // EVM signing
-export { buildEthSignRequestUR, buildEthSignRequestURParts } from "./eth/signRequest.js";
+export {
+  buildEthSignRequestUR,
+  buildEthSignRequestURParts,
+  EthDataType,
+} from "./eth/signRequest.js";
+export type { EthDataTypeValue, EthSignRequestParams } from "./eth/signRequest.js";
 export { parseEthSignature } from "./eth/signature.js";

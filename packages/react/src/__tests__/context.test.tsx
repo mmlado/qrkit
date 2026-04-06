@@ -28,7 +28,7 @@ describe("QRKitProvider / useQRKit", () => {
   it("sign returns a Promise", () => {
     const { result } = renderHook(() => useQRKit(), { wrapper });
     const promise = result.current.sign({
-      message: "hello",
+      signData: "hello",
       address: "0xabc",
       sourceFingerprint: undefined,
     });
