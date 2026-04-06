@@ -36,8 +36,8 @@ importers:
   apps/react:
     dependencies:
       '@qrkit/react':
-        specifier: ^0.2.0
-        version: 0.2.0(react-dom@19.2.4(react@19.2.4))(react-native@0.84.1(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)
+        specifier: workspace:*
+        version: link:../../packages/react
       react:
         specifier: ^19.2.4
         version: 19.2.4
@@ -970,15 +970,6 @@ packages:
 
   '@qrkit/bc-ur@2.0.0-beta.9-qrkit.2':
     resolution: {integrity: sha512-qpUmqAwYyF0q3/EudncPdTX79/knOHadQtZsCuARFZ9GVa96mhMmI2xzo8siZ4Q1rHgObgGHIU42pWzeQH7H4Q==}
-
-  '@qrkit/core@0.2.0':
-    resolution: {integrity: sha512-hfMLy0DLcPM0zKrWEA2Nwp4q/WiyYf/z3+/cWsNQqlEAjOVBSvmvjepN5LNbIWgW3jUeg1dZrG2x+Y+brzoM1A==}
-
-  '@qrkit/react@0.2.0':
-    resolution: {integrity: sha512-VpY5ttCTyO+LoK+uW4WZ7uphl8O4WAXVNuKkUylh9dkAvdQwIaOkMbocnlsVSBrZs0eOj71kS5zD840bv+TB+w==}
-    peerDependencies:
-      react: '>=18'
-      react-dom: '>=18'
 
   '@react-native/assets-registry@0.84.1':
     resolution: {integrity: sha512-lAJ6PDZv95FdT9s9uhc9ivhikW1Zwh4j9XdXM7J2l4oUA3t37qfoBmTSDLuPyE3Bi+Xtwa11hJm0BUTT2sc/gg==}
@@ -4282,28 +4273,6 @@ snapshots:
     dependencies:
       '@bacons/text-decoder': 0.0.0(react-native@0.84.1(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.4))
       cbor2: 1.12.0
-    transitivePeerDependencies:
-      - react-native
-
-  '@qrkit/core@0.2.0(react-native@0.84.1(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.4))':
-    dependencies:
-      '@noble/hashes': 2.0.1
-      '@noble/secp256k1': 3.0.0
-      '@qrkit/bc-ur': 2.0.0-beta.9-qrkit.2(react-native@0.84.1(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.4))
-      '@scure/bip32': 2.0.1
-      cborg: 4.5.8
-    transitivePeerDependencies:
-      - react-native
-
-  '@qrkit/react@0.2.0(react-dom@19.2.4(react@19.2.4))(react-native@0.84.1(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.4))(react@19.2.4)':
-    dependencies:
-      '@qrkit/bc-ur': 2.0.0-beta.9-qrkit.2(react-native@0.84.1(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.4))
-      '@qrkit/core': 0.2.0(react-native@0.84.1(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.4))
-      focus-trap: 8.0.1
-      jsqr: 1.4.0
-      qrcode: 1.5.4
-      react: 19.2.4
-      react-dom: 19.2.4(react@19.2.4)
     transitivePeerDependencies:
       - react-native
 

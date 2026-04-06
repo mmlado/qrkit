@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@qrkit/react": "^0.3.0",
+    "@qrkit/react": "workspace:*",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },
