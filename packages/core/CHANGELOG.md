@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1
+
+### Patch Changes
+
+- Expose device name from crypto-hdkey key 9 as `device` on `Account`. Wallets that set this field (e.g. Keycard Shell) will now surface the device name through `parseConnection` and `parseXpub`.
+
 ## 0.3.0
 
 ### Minor Changes
