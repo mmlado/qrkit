@@ -1,4 +1,4 @@
-import { UR, UrFountainEncoder } from "@qrkit/bc-ur";
+import { UR, UrFountainEncoder } from "@qrkit/bc-ur-web";
 
 export function encodeURParts(
   cbor: Uint8Array,

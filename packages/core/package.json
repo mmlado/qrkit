@@ -26,7 +26,7 @@
     "example": "tsx examples/eth-flow.ts"
   },
   "dependencies": {
-    "@qrkit/bc-ur": "2.0.0-beta.9-qrkit.2",
+    "@qrkit/bc-ur-web": "^2.0.1",
     "@noble/hashes": "^2.0.1",
     "@noble/secp256k1": "^3.0.0",
     "@scure/bip32": "^2.0.1",

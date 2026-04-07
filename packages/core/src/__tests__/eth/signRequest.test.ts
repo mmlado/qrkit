@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { decode, type TagDecoder } from "cborg";
-import { UrFountainDecoder } from "@qrkit/bc-ur";
+import { UrFountainDecoder } from "@qrkit/bc-ur-web";
 
 import {
   buildEthSignRequestUR,

@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 
-import { UrFountainDecoder } from "@qrkit/bc-ur";
+import { UrFountainDecoder } from "@qrkit/bc-ur-web";
 
 import type { ScannedUR } from "@qrkit/core";
 

@@ -1,4 +1,4 @@
-import { UrFountainDecoder } from "@qrkit/bc-ur";
+import { UrFountainDecoder } from "@qrkit/bc-ur-web";
 
 // Real UR captured from a Shell device (m/44'/60'/0')
 export const ETH_HDKEY_UR =

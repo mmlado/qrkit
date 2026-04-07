@@ -11,7 +11,7 @@
  *   4. Parse a simulated eth-signature response
  */
 
-import { UrFountainDecoder } from "@qrkit/bc-ur";
+import { UrFountainDecoder } from "@qrkit/bc-ur-web";
 import {
   parseConnection,
   buildEthSignRequestURParts,

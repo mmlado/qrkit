@@ -69,9 +69,9 @@ importers:
       '@noble/secp256k1':
         specifier: ^3.0.0
         version: 3.0.0
-      '@qrkit/bc-ur':
-        specifier: 2.0.0-beta.9-qrkit.2
-        version: 2.0.0-beta.9-qrkit.2(react-native@0.84.1(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.4))
+      '@qrkit/bc-ur-web':
+        specifier: ^2.0.1
+        version: 2.0.1
       '@scure/bip32':
         specifier: ^2.0.1
         version: 2.0.1
@@ -97,9 +97,9 @@ importers:
 
   packages/react:
     dependencies:
-      '@qrkit/bc-ur':
-        specifier: 2.0.0-beta.9-qrkit.2
-        version: 2.0.0-beta.9-qrkit.2(react-native@0.84.1(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.4))
+      '@qrkit/bc-ur-web':
+        specifier: ^2.0.1
+        version: 2.0.1
       '@qrkit/core':
         specifier: workspace:*
         version: link:../core
@@ -967,6 +967,9 @@ packages:
 
   '@oxc-project/types@0.122.0':
     resolution: {integrity: sha512-oLAl5kBpV4w69UtFZ9xqcmTi+GENWOcPF7FCrczTiBbmC0ibXxCwyvZGbO39rCVEuLGAZM84DH0pUIyyv/YJzA==}
+
+  '@qrkit/bc-ur-web@2.0.1':
+    resolution: {integrity: sha512-sng5nX2K6S99mn4USxVPwG3i960gfu2Ucgsyfmdo0LoK/6dk/ks2LKjEFx0unlQY4J+M2xn+Aa/q+SUQJetFdA==}
 
   '@qrkit/bc-ur@2.0.0-beta.9-qrkit.2':
     resolution: {integrity: sha512-qpUmqAwYyF0q3/EudncPdTX79/knOHadQtZsCuARFZ9GVa96mhMmI2xzo8siZ4Q1rHgObgGHIU42pWzeQH7H4Q==}
@@ -4277,6 +4280,10 @@ snapshots:
       fastq: 1.20.1
 
   '@oxc-project/types@0.122.0': {}
+
+  '@qrkit/bc-ur-web@2.0.1':
+    dependencies:
+      cbor2: 1.12.0
 
   '@qrkit/bc-ur@2.0.0-beta.9-qrkit.2(react-native@0.84.1(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.4))':
     dependencies:
