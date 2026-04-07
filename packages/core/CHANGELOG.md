@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.2
+
+### Patch Changes
+
+- Replace @qrkit/bc-ur dependency with @qrkit/bc-ur-web, the renamed browser-native fork that drops the Buffer and React Native polyfill dependencies.
+
 ## 0.3.1
 
 ### Patch Changes

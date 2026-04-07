@@ -83,7 +83,7 @@ Leave a blank line between each group.
 ```ts
 // external
 import { decode } from "cborg";
-import { UrFountainDecoder } from "@qrkit/bc-ur";
+import { UrFountainDecoder } from "@qrkit/bc-ur-web";
 
 // internal package
 import type { ScannedUR } from "@qrkit/core";
@@ -106,7 +106,7 @@ The root `tsconfig.base.json` defines shared compiler options. Each package exte
 
 The core package implements:
 
-- **UR (Uniform Resources)** — self-describing, CBOR-encoded format for QR data, optionally split across animated frames. Uses `@qrkit/bc-ur` (pure JS, no `Buffer` dependency).
+- **UR (Uniform Resources)** — self-describing, CBOR-encoded format for QR data, optionally split across animated frames. Uses `@qrkit/bc-ur-web` (pure JS, no `Buffer` dependency).
 - **CBOR** — binary encoding used inside UR payloads. Uses `cborg`.
 - **crypto-hdkey / crypto-account** — UR types for exporting xpubs from a hardware wallet.
 - **eth-sign-request / eth-signature** — UR types for EVM signing flows (ERC-4527).
@@ -125,7 +125,7 @@ The prototype implementation at `../shell_dapp_prototype/src/lib/` is the refere
 - Scanning and rendering are split into two layers: batteries-included (`useQRScanner`, `useQRDisplay`) and primitive (`useURDecoder`, `useQRParts`). The primitives accept/emit raw strings and are scanner/renderer agnostic.
 - UI dependencies: `jsqr` for camera scanning (pure JS, no WASM — works in browser extensions and service workers), `qrcode` for canvas rendering, `focus-trap` for modal accessibility. Do not pull in full UI frameworks.
 - Default styles follow Material Design 3 tokens and support automatic light/dark via `prefers-color-scheme`. Theme overrides use CSS custom properties via a `<style>` tag injected by `QRKitProvider`.
-- `@qrkit/bc-ur` API: encode via `UR.fromCbor({ type, payload: Uint8Array })` + `UrFountainEncoder`, decode via `UrFountainDecoder` with `receivePartUr(string)`, `isComplete()`, `resultUr.getPayloadCbor()`. The old `@ngraveio/bc-ur` API (`new UR(Buffer, type)`, `UREncoder`, `URDecoder`, `resultUR()`, `ur.cbor`) is gone.
+- UR codec is `@qrkit/bc-ur-web` — a browser-native fork of `@ngraveio/bc-ur` 2.0-beta with Buffer and React Native polyfill deps removed. API: encode via `UR.fromCbor({ type, payload: Uint8Array })` + `UrFountainEncoder`, decode via `UrFountainDecoder` with `receivePartUr(string)`, `isComplete()`, `resultUr.getPayloadCbor()`. The old `@ngraveio/bc-ur` 1.x API (`new UR(Buffer, type)`, `UREncoder`, `URDecoder`, `resultUR()`, `ur.cbor`) is gone. `@qrkit/bc-ur` is a deprecated shell that re-exports `@qrkit/bc-ur-web`.
 - `focus-trap` is configured with `escapeDeactivates: false` — Escape is handled by a separate `keydown` listener. Do not set `onDeactivate: onClose`; the camera permission dialog steals focus and would immediately close the modal.
 - `Account` carries a `device?: string` field sourced from crypto-hdkey key 9 (the optional `name` field in the UR spec). It is `undefined` when the wallet does not set it. Any new chain-specific account type (BTC etc.) must include this field too.
 
