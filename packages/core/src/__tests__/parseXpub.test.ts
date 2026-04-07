@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 
 import { parseXpub } from "../parseXpub.js";
-import { ETH_HDKEY_UR, SOURCE_FINGERPRINT, urToCbor } from "./fixtures.js";
+import { ETH_HDKEY_UR, SOURCE_FINGERPRINT, DEVICE_NAME, urToCbor } from "./fixtures.js";
 
 describe("parseXpub — UR crypto-hdkey", () => {
   it("parses purpose and coinType from the ETH key UR", () => {
@@ -14,6 +14,11 @@ describe("parseXpub — UR crypto-hdkey", () => {
   it("extracts source-fingerprint", () => {
     const [parsed] = parseXpub({ type: "crypto-hdkey", cbor: urToCbor(ETH_HDKEY_UR) });
     expect(parsed.sourceFingerprint).toBe(SOURCE_FINGERPRINT);
+  });
+
+  it("extracts the device name from key 9 when set by the wallet", () => {
+    const [parsed] = parseXpub({ type: "crypto-hdkey", cbor: urToCbor(ETH_HDKEY_UR) });
+    expect(parsed.name).toBe(DEVICE_NAME);
   });
 
   it("returns an HDKey that can derive child keys", () => {

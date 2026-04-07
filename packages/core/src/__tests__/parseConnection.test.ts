@@ -1,7 +1,13 @@
 import { describe, it, expect } from "vitest";
 
 import { parseConnection } from "../parseConnection.js";
-import { ETH_HDKEY_UR, ETH_ADDRESS, SOURCE_FINGERPRINT, urToCbor } from "./fixtures.js";
+import {
+  ETH_HDKEY_UR,
+  ETH_ADDRESS,
+  SOURCE_FINGERPRINT,
+  DEVICE_NAME,
+  urToCbor,
+} from "./fixtures.js";
 
 const scannedUR = { type: "crypto-hdkey", cbor: urToCbor(ETH_HDKEY_UR) };
 
@@ -20,6 +26,11 @@ describe("parseConnection — chains: ['evm']", () => {
   it("carries source-fingerprint through", () => {
     const [account] = parseConnection(scannedUR, { chains: ["evm"] });
     expect(account.sourceFingerprint).toBe(SOURCE_FINGERPRINT);
+  });
+
+  it("carries the device name through to the returned account", () => {
+    const [account] = parseConnection(scannedUR, { chains: ["evm"] });
+    expect(account.device).toBe(DEVICE_NAME);
   });
 });
 

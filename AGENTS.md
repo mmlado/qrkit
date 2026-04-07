@@ -127,6 +127,7 @@ The prototype implementation at `../shell_dapp_prototype/src/lib/` is the refere
 - Default styles follow Material Design 3 tokens and support automatic light/dark via `prefers-color-scheme`. Theme overrides use CSS custom properties via a `<style>` tag injected by `QRKitProvider`.
 - `@qrkit/bc-ur` API: encode via `UR.fromCbor({ type, payload: Uint8Array })` + `UrFountainEncoder`, decode via `UrFountainDecoder` with `receivePartUr(string)`, `isComplete()`, `resultUr.getPayloadCbor()`. The old `@ngraveio/bc-ur` API (`new UR(Buffer, type)`, `UREncoder`, `URDecoder`, `resultUR()`, `ur.cbor`) is gone.
 - `focus-trap` is configured with `escapeDeactivates: false` — Escape is handled by a separate `keydown` listener. Do not set `onDeactivate: onClose`; the camera permission dialog steals focus and would immediately close the modal.
+- `Account` carries a `device?: string` field sourced from crypto-hdkey key 9 (the optional `name` field in the UR spec). It is `undefined` when the wallet does not set it. Any new chain-specific account type (BTC etc.) must include this field too.
 
 ## Changelogs
 

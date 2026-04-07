@@ -8,6 +8,8 @@ export interface DerivedAccount {
   publicKey: string;
   /** source-fingerprint from the scanned xpub — required by Shell for signing */
   sourceFingerprint: number | undefined;
+  /** device or key name as reported by the hardware wallet, if available */
+  device: string | undefined;
 }
 
 // Derive the first external address (index 0) from an account-level xpub.
@@ -23,7 +25,7 @@ function toHex(bytes: Uint8Array): string {
 
 export function deriveEvmAccount(parsed: ParsedXpub[]): DerivedAccount | undefined {
   for (const entry of parsed) {
-    const { hdKey, purpose, coinType, type, sourceFingerprint } = entry;
+    const { hdKey, purpose, coinType, type, sourceFingerprint, name } = entry;
     const isEvm =
       (purpose === 44 && coinType === 60) || (purpose === undefined && type === "xpub");
 
@@ -36,6 +38,7 @@ export function deriveEvmAccount(parsed: ParsedXpub[]): DerivedAccount | undefin
       address: pubKeyToEthAddress(child.publicKey),
       publicKey: toHex(child.publicKey),
       sourceFingerprint,
+      device: name,
     };
   }
   return undefined;

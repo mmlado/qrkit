@@ -14,6 +14,8 @@ export interface ParsedXpub {
   coinType: number | undefined;
   /** source-fingerprint from the origin keypath — required by Shell for signing */
   sourceFingerprint: number | undefined;
+  /** device or key name from crypto-hdkey key 9, set by some wallets (e.g. Keystone) */
+  name?: string;
   raw: string;
 }
 
@@ -56,8 +58,10 @@ function parseCryptoHdKey(map: unknown, raw: string): ParsedXpub {
     sourceFingerprint = get(origin, 2) as number | undefined;
   }
 
+  const name = get(map, 9) as string | undefined;
+
   const hdKey = new HDKey({ publicKey: keyData, chainCode });
-  return { hdKey, type: "xpub", purpose, coinType, sourceFingerprint, raw };
+  return { hdKey, type: "xpub", purpose, coinType, sourceFingerprint, name, raw };
 }
 
 function parseScannedUR(scanned: ScannedUR): ParsedXpub | ParsedXpub[] {

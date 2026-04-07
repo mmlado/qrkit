@@ -2,7 +2,13 @@ import { describe, it, expect } from "vitest";
 
 import { parseXpub } from "../../parseXpub.js";
 import { deriveEvmAccount } from "../../eth/deriveAccount.js";
-import { ETH_HDKEY_UR, ETH_ADDRESS, SOURCE_FINGERPRINT, urToCbor } from "../fixtures.js";
+import {
+  ETH_HDKEY_UR,
+  ETH_ADDRESS,
+  SOURCE_FINGERPRINT,
+  DEVICE_NAME,
+  urToCbor,
+} from "../fixtures.js";
 
 describe("deriveEvmAccount", () => {
   it("derives the correct EVM address from a real Shell device key", () => {
@@ -25,5 +31,11 @@ describe("deriveEvmAccount", () => {
 
   it("returns undefined for an empty input", () => {
     expect(deriveEvmAccount([])).toBeUndefined();
+  });
+
+  it("carries the device name through from the parsed xpub", () => {
+    const parsed = parseXpub({ type: "crypto-hdkey", cbor: urToCbor(ETH_HDKEY_UR) });
+    const account = deriveEvmAccount(parsed);
+    expect(account?.device).toBe(DEVICE_NAME);
   });
 });

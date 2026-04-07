@@ -17,6 +17,8 @@ export interface EvmAccount {
   publicKey: string;
   /** source-fingerprint from the scanned xpub — required by Shell for signing */
   sourceFingerprint: number | undefined;
+  /** device or key name as reported by the hardware wallet, if available */
+  device: string | undefined;
 }
 
 // BtcAccount will be added here when Bitcoin support is implemented.

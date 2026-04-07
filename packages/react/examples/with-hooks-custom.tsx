@@ -36,7 +36,7 @@ export function App() {
 
   const signParts =
     account?.chain === "evm"
-      ? buildEthSignRequestURParts("Hello", account.address, account.sourceFingerprint, "My dApp")
+      ? buildEthSignRequestURParts({ signData: "Hello", address: account.address, sourceFingerprint: account.sourceFingerprint, origin: "My dApp" })
       : [];
 
   // useQRParts cycles through parts — feed the current string to any renderer
