@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0
+
+### Minor Changes
+
+- Parse BTC accounts from `crypto-account` and `crypto-multi-accounts`.
+- Derive BTC addresses and account metadata for supported script types.
+- Build and parse BTC message signing URs and `crypto-psbt` payloads.
+
 ## 0.3.2
 
 ### Patch Changes

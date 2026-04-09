@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.4.0
+
+### Minor Changes
+
+- Add BTC account selection to the connect flow.
+- Add BTC message and PSBT signing support to the sign flow.
+- Improve animated UR scanning behavior for repeated QR frames.
+
+### Patch Changes
+
+- Updated dependencies
+  - @qrkit/core@0.4.0
+
 ## 0.3.2
 
 ### Patch Changes
