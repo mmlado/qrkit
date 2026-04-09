@@ -1,12 +1,13 @@
 import type { HDKey } from "@scure/bip32";
 
-import { bytesToHex } from "../bytes.js";
 import {
   pubKeyToP2pkh,
   pubKeyToP2shP2wpkh,
   pubKeyToP2wpkh,
   type BtcScriptType,
 } from "./address.js";
+
+import { bytesToHex } from "../bytes.js";
 import type { ParsedXpub } from "../parseXpub.js";
 
 export interface DerivedBtcAccount {

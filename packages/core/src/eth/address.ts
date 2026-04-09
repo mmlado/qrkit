@@ -1,8 +1,11 @@
+import { secp256k1 } from "@noble/curves/secp256k1.js";
 import { keccak_256 } from "@noble/hashes/sha3.js";
-import * as secp from "@noble/secp256k1";
 
 export function pubKeyToEthAddress(compressedPubKey: Uint8Array): string {
-  const uncompressed = secp.Point.fromBytes(compressedPubKey).toBytes(false);
+  const pubKeyHex = [...compressedPubKey]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  const uncompressed = secp256k1.Point.fromHex(pubKeyHex).toBytes(false);
   const hash = keccak_256(uncompressed.slice(1));
   const hex = [...hash.slice(12)]
     .map((b: number) => b.toString(16).padStart(2, "0"))

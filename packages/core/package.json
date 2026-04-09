@@ -29,8 +29,8 @@
     "example:btc-psbt": "tsx examples/btc-psbt-flow.ts"
   },
   "dependencies": {
+    "@noble/curves": "^2.0.1",
     "@noble/hashes": "^2.0.1",
-    "@noble/secp256k1": "^3.0.0",
     "@qrkit/bc-ur-web": "^2.0.1",
     "@scure/base": "^2.0.0",
     "@scure/bip32": "^2.0.1",
