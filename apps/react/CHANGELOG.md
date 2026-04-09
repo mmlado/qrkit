@@ -1,5 +1,11 @@
 # @qrkit/app-react
 
+## 0.1.1
+
+### Patch Changes
+
+- @qrkit/react@0.4.1
+
 ## 0.1.0
 
 ### Minor Changes

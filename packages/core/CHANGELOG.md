@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1
+
+### Patch Changes
+
+- Replace `@noble/secp256k1` with `@noble/curves` for secp256k1 point decompression.
+
 ## 0.4.0
 
 ### Minor Changes
