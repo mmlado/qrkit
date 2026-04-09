@@ -10,15 +10,19 @@
 
 Generic QR connector for airgapped wallet flows. **[Live demo →](https://qrkit-react.vercel.app/)**
 
-A reusable library for QR-based, airgapped wallet connection and signing flows. Built around [ERC-4527](https://eips.ethereum.org/EIPS/eip-4527) / UR / CBOR — the same protocol used by Keystone and Shell hardware wallets.
+A reusable library for QR-based, airgapped wallet connection and signing flows. Built around [ERC-4527](https://eips.ethereum.org/EIPS/eip-4527) / UR / CBOR — the same protocol used by Shell and similar hardware wallets.
+
+Tested with:
+- [Shell](https://get.keycard.tech/mmlado)
+- [GapSign](https://github.com/mmlado/GapSign)
 
 ## Packages
 
-| Package | Description |
-|---|---|
-| [`@qrkit/core`](./packages/core) | Protocol logic: UR decoding, xpub parsing, address derivation, sign request and signature handling |
-| [`@qrkit/react`](./packages/react) | React context, hooks, and drop-in components for connection and signing flows |
-| [`@qrkit/wagmi`](./packages/wagmi) | wagmi connector adapter for EVM dApps |
+| Package                            | Description                                                                                                       |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| [`@qrkit/core`](./packages/core)   | Protocol logic: UR decoding, xpub parsing, EVM/BTC address derivation, sign request, PSBT, and signature handling |
+| [`@qrkit/react`](./packages/react) | React context, hooks, and drop-in components for connection and signing flows                                     |
+| [`@qrkit/wagmi`](./packages/wagmi) | wagmi connector adapter for EVM dApps                                                                             |
 
 ## Architecture
 
@@ -37,31 +41,45 @@ The core package can be used in any environment. The React and wagmi packages ar
 Wrap your app in `QRKitProvider`. Call `connect()` and `sign()` from anywhere — modals appear automatically.
 
 ```tsx
-import { QRKitProvider, useQRKit } from '@qrkit/react'
-import '@qrkit/react/styles.css'
+import { QRKitProvider, useQRKit } from "@qrkit/react";
+import "@qrkit/react/styles.css";
 
 export function App() {
   return (
     <QRKitProvider appName="My dApp">
       <Wallet />
     </QRKitProvider>
-  )
+  );
 }
 
 function Wallet() {
-  const { account, connect, disconnect, sign } = useQRKit()
+  const { account, connect, disconnect, sign } = useQRKit();
 
   async function handleSign() {
-    if (!account) return
+    if (!account) return;
+
+    if (account.chain === "evm") {
+      const sig = await sign({
+        signData: "Hello from My dApp",
+        address: account.address,
+        sourceFingerprint: account.sourceFingerprint,
+      });
+      console.log("EVM signature:", sig);
+      return;
+    }
+
     const sig = await sign({
-      message: 'Hello from My dApp',
+      chain: "btc",
+      requestType: "message",
+      signData: "Hello from My dApp",
       address: account.address,
-      sourceFingerprint: account.chain === 'evm' ? account.sourceFingerprint : undefined,
-    })
-    console.log('Signature:', sig)
+      scriptType: account.scriptType,
+      sourceFingerprint: account.sourceFingerprint,
+    });
+    console.log("BTC signature:", sig);
   }
 
-  if (!account) return <button onClick={connect}>Connect wallet</button>
+  if (!account) return <button onClick={connect}>Connect wallet</button>;
 
   return (
     <div>
@@ -69,9 +87,11 @@ function Wallet() {
       <button onClick={handleSign}>Sign message</button>
       <button onClick={disconnect}>Disconnect</button>
     </div>
-  )
+  );
 }
 ```
+
+The built-in React connect flow also supports multi-account scans, including mixed EVM and BTC exports from `crypto-multi-accounts`.
 
 Styles follow Material Design 3 and adapt to light/dark system preference automatically. Override with CSS variables:
 
@@ -93,13 +113,13 @@ Or via the `theme` prop:
 For custom layouts, use `useQRScanner` and `useQRDisplay` directly. To plug in your own scanning or rendering library, use `useURDecoder` and `useQRParts`:
 
 ```tsx
-import { useURDecoder, useQRParts } from '@qrkit/react'
+import { useURDecoder, useQRParts } from "@qrkit/react";
 
 // Feed raw QR strings from any scanner
-const { receivePart, progress } = useURDecoder({ onScan })
+const { receivePart, progress } = useURDecoder({ onScan });
 
 // Get the current frame string for any renderer
-const { part, frame, total } = useQRParts({ parts })
+const { part, frame, total } = useQRParts({ parts });
 ```
 
 ### wagmi
@@ -120,18 +140,43 @@ import {
   parseConnection,
   buildEthSignRequestURParts,
   parseEthSignature,
-} from '@qrkit/core'
+  buildBtcSignRequestURParts,
+  parseBtcSignature,
+  buildCryptoPsbtURParts,
+  parseCryptoPsbt,
+} from "@qrkit/core";
 
 // Parse a connection QR from the wallet
-const accounts = parseConnection(scannedUR, { chains: ['evm'] })
-const account = accounts.find(a => a.chain === 'evm')
+const accounts = parseConnection(scannedUR, { chains: ["evm", "btc"] });
+const evm = accounts.find((a) => a.chain === "evm");
+const btc = accounts.find((a) => a.chain === "btc");
+if (!evm || !btc) throw new Error("Missing account");
 
-// Build a sign request — render parts as QR codes
-const parts = buildEthSignRequestURParts(message, account.address, account.sourceFingerprint)
+// Build an EVM sign request — render parts as QR codes
+const evmParts = buildEthSignRequestURParts({
+  signData: message,
+  address: evm.address,
+  sourceFingerprint: evm.sourceFingerprint,
+});
 
 // Parse the wallet's signature response
-const signature = parseEthSignature(scannedResponseUR)
+const ethSignature = parseEthSignature(scannedResponseUR);
+
+// Build a direct BTC message sign request
+const btcParts = buildBtcSignRequestURParts({
+  signData: message,
+  address: btc.address,
+  scriptType: btc.scriptType,
+  sourceFingerprint: btc.sourceFingerprint,
+});
+const btcSignature = parseBtcSignature(scannedResponseUR);
+
+// Carry a PSBT for BTC transaction signing
+const psbtParts = buildCryptoPsbtURParts(unsignedPsbtHex);
+const signedPsbt = parseCryptoPsbt(scannedResponseUR);
 ```
+
+Like the core package, the React layer carries BIP-322-style message signing over `crypto-psbt`. Wallet review UX for that flow is device-dependent.
 
 ## Development
 

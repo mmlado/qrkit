@@ -8,9 +8,9 @@ export type XpubType = "xpub";
 export interface ParsedXpub {
   hdKey: HDKey;
   type: XpubType;
-  /** BIP-44 purpose index: 44 for EVM */
+  /** BIP-44 purpose index: 44 for EVM, 44/49/84 for supported BTC scripts */
   purpose: number | undefined;
-  /** BIP-44 coin type: 60 = ETH */
+  /** BIP-44 coin type: 60 = ETH, 0 = BTC */
   coinType: number | undefined;
   /** source-fingerprint from the origin keypath — required by Shell for signing */
   sourceFingerprint: number | undefined;
@@ -19,27 +19,70 @@ export interface ParsedXpub {
   raw: string;
 }
 
+type CborMap = Map<number, unknown>;
+
 function get(m: unknown, k: number): unknown {
   if (m instanceof Map) return (m as Map<number, unknown>).get(k);
+  return undefined;
+}
+
+function bytesFromCbor(value: unknown): Uint8Array | undefined {
+  if (value instanceof Uint8Array) return value;
+
+  if (value instanceof Map && value.get("type") === "Buffer") {
+    const data = value.get("data");
+    if (
+      Array.isArray(data) &&
+      data.every((byte) => Number.isInteger(byte) && byte >= 0 && byte <= 0xff)
+    ) {
+      return new Uint8Array(data);
+    }
+  }
+
   return undefined;
 }
 
 const passthrough = (v: unknown) => v;
 
 function decodeCbor(cbor: Uint8Array): Map<number, unknown> {
+  // Connection payloads often wrap the inner hdkey/output structures in semantic CBOR tags
+  // (script expressions, crypto-output, vendor-specific wrappers, etc.). For connection
+  // parsing we only care about the inner map/bytes shape, so tags are treated as annotations
+  // and stripped during decode. Required structure is validated explicitly later.
+  const tags = new Proxy([] as TagDecoder[], {
+    get(target, property, receiver) {
+      if (typeof property === "string" && /^\d+$/.test(property)) {
+        return passthrough;
+      }
+      return Reflect.get(target, property, receiver);
+    },
+  });
+
   return cborDecode(cbor, {
     useMaps: true,
-    tags: Object.assign([] as TagDecoder[], {
-      303: passthrough, // crypto-hdkey
-      304: passthrough, // crypto-keypath
-      305: passthrough, // crypto-coin-info
-    }),
+    tags,
   }) as Map<number, unknown>;
 }
 
-function parseCryptoHdKey(map: unknown, raw: string): ParsedXpub {
-  const keyData = get(map, 3) as Uint8Array | undefined;
-  const chainCode = get(map, 4) as Uint8Array | undefined;
+function isCborMap(value: unknown): value is CborMap {
+  return value instanceof Map;
+}
+
+function assertCryptoHdKeyShape(value: unknown): CborMap {
+  if (!isCborMap(value)) {
+    throw new Error("crypto-hdkey entry must be a CBOR map");
+  }
+
+  if (!value.has(3) || !value.has(4)) {
+    throw new Error("crypto-hdkey missing key-data or chain-code");
+  }
+
+  return value;
+}
+
+function parseCryptoHdKey(map: CborMap, raw: string, fallbackName?: string): ParsedXpub {
+  const keyData = bytesFromCbor(get(map, 3));
+  const chainCode = bytesFromCbor(get(map, 4));
 
   if (!keyData || !chainCode) {
     throw new Error("crypto-hdkey missing key-data or chain-code");
@@ -58,7 +101,7 @@ function parseCryptoHdKey(map: unknown, raw: string): ParsedXpub {
     sourceFingerprint = get(origin, 2) as number | undefined;
   }
 
-  const name = get(map, 9) as string | undefined;
+  const name = (get(map, 9) as string | undefined) ?? fallbackName;
 
   const hdKey = new HDKey({ publicKey: keyData, chainCode });
   return { hdKey, type: "xpub", purpose, coinType, sourceFingerprint, name, raw };
@@ -68,21 +111,29 @@ function parseScannedUR(scanned: ScannedUR): ParsedXpub | ParsedXpub[] {
   const { type, cbor } = scanned;
   const raw = `ur:${type}`;
 
-  if (type !== "crypto-hdkey" && type !== "crypto-account") {
+  if (
+    type !== "crypto-hdkey" &&
+    type !== "crypto-account" &&
+    type !== "crypto-multi-accounts"
+  ) {
     throw new Error(`Unsupported UR type: ${type}`);
   }
 
   const map = decodeCbor(cbor);
 
   if (type === "crypto-hdkey") {
-    return parseCryptoHdKey(map, raw);
+    return parseCryptoHdKey(assertCryptoHdKeyShape(map), raw);
   }
 
   const accounts = map.get(2) as unknown[] | undefined;
   if (!Array.isArray(accounts) || accounts.length === 0) {
-    throw new Error("crypto-account contains no keys");
+    throw new Error(`${type} contains no keys`);
   }
-  return accounts.map((entry) => parseCryptoHdKey(entry, raw));
+  const fallbackName =
+    type === "crypto-multi-accounts" ? (map.get(3) as string | undefined) : undefined;
+  return accounts.map((entry) =>
+    parseCryptoHdKey(assertCryptoHdKeyShape(entry), raw, fallbackName),
+  );
 }
 
 export function parseXpub(input: ScannedUR | string): ParsedXpub[] {

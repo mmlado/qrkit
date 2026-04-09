@@ -1,6 +1,14 @@
-import { parseXpub } from "./parseXpub.js";
+import { deriveBtcAccount } from "./btc/deriveAccount.js";
 import { deriveEvmAccount } from "./eth/deriveAccount.js";
-import type { Account, Chain, EvmAccount, QRKitConfig, ScannedUR } from "./types.js";
+import { parseXpub } from "./parseXpub.js";
+import type {
+  Account,
+  BtcAccount,
+  Chain,
+  EvmAccount,
+  QRKitConfig,
+  ScannedUR,
+} from "./types.js";
 
 const ALL_CHAINS: Chain[] = ["evm", "btc"];
 
@@ -21,13 +29,16 @@ export function parseConnection(
   const accounts: Account[] = [];
 
   if (chains.includes("evm")) {
-    const account = deriveEvmAccount(parsed);
-    if (account) {
+    for (const account of deriveEvmAccount(parsed)) {
       accounts.push({ chain: "evm", ...account } satisfies EvmAccount);
     }
   }
 
-  // "btc" — will be implemented in src/btc/ when Bitcoin support is added.
+  if (chains.includes("btc")) {
+    for (const account of deriveBtcAccount(parsed)) {
+      accounts.push({ chain: "btc", ...account } satisfies BtcAccount);
+    }
+  }
 
   return accounts;
 }

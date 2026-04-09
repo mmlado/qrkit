@@ -1,5 +1,6 @@
 import { decode as cborDecode, type TagDecoder } from "cborg";
 
+import { bytesToHex } from "../bytes.js";
 import type { ScannedUR } from "../types.js";
 
 export function parseEthSignature(scanned: ScannedUR): string {
@@ -17,5 +18,5 @@ export function parseEthSignature(scanned: ScannedUR): string {
     throw new Error("Invalid or missing signature bytes");
   }
 
-  return "0x" + [...sigBytes].map((b) => b.toString(16).padStart(2, "0")).join("");
+  return `0x${bytesToHex(sigBytes)}`;
 }

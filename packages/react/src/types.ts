@@ -1,4 +1,4 @@
-import type { Account } from "@qrkit/core";
+import type { Account, BtcSignature, Chain, CryptoPsbt } from "@qrkit/core";
 
 export interface QRKitTheme {
   /** Primary accent color. Defaults follow MD3: light #6750A4, dark #D0BCFF */
@@ -17,7 +17,8 @@ export interface QRKitTheme {
   fontFamily?: string;
 }
 
-export interface SignRequest {
+export interface EvmSignRequest {
+  chain?: "evm";
   /**
    * Data to sign. For PersonalMessage (type 3), a plain string is accepted and
    * UTF-8-encoded automatically. For transactions and typed data, pass raw bytes.
@@ -34,12 +35,30 @@ export interface SignRequest {
   chainId?: number;
 }
 
+export interface BtcMessageSignRequest {
+  chain: "btc";
+  requestType: "message";
+  signData: Uint8Array | string;
+  address: string;
+  scriptType: "p2wpkh" | "p2sh-p2wpkh" | "p2pkh";
+  sourceFingerprint: number | undefined;
+}
+
+export interface BtcPsbtSignRequest {
+  chain: "btc";
+  requestType: "psbt";
+  psbt: Uint8Array | string;
+}
+
+export type SignRequest = EvmSignRequest | BtcMessageSignRequest | BtcPsbtSignRequest;
+export type SignResult = string | BtcSignature | CryptoPsbt;
+
 export interface QRKitContextValue {
   account: Account | null;
   connect: () => void;
   disconnect: () => void;
-  /** Open the sign modal and resolve with the hex signature. */
-  sign: (request: SignRequest) => Promise<string>;
+  /** Open the sign modal and resolve with the parsed signature or signed PSBT. */
+  sign: (request: SignRequest) => Promise<SignResult>;
 }
 
 export interface QRKitProviderProps {
@@ -47,4 +66,6 @@ export interface QRKitProviderProps {
   theme?: QRKitTheme;
   /** App name shown in the sign request origin field. Default: "qrkit" */
   appName?: string;
+  /** Chains accepted by the connection modal. Defaults to all supported chains. */
+  chains?: Chain[];
 }

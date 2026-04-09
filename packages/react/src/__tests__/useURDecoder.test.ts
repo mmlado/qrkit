@@ -1,6 +1,8 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { buildCryptoPsbtURParts } from "@qrkit/core";
+
 import { useURDecoder } from "../hooks/useURDecoder.js";
 
 // Real single-part UR from a Shell device (eth-hdkey)
@@ -85,5 +87,23 @@ describe("useURDecoder", () => {
     });
 
     expect(result.current.progress).toBeNull();
+  });
+
+  it("accepts repeated animated UR parts and completes once enough frames arrive", () => {
+    const onScan = vi.fn().mockReturnValue(true);
+    const { result } = renderHook(() => useURDecoder({ onScan }));
+    const parts = buildCryptoPsbtURParts(new Uint8Array(1024));
+
+    let done = false;
+    act(() => {
+      for (const part of parts) {
+        result.current.receivePart(part);
+        done = result.current.receivePart(part);
+      }
+    });
+
+    expect(done).toBe(true);
+    expect(onScan).toHaveBeenCalledOnce();
+    expect(onScan.mock.calls[0][0]).toMatchObject({ type: "crypto-psbt" });
   });
 });

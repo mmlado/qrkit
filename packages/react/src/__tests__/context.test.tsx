@@ -1,5 +1,13 @@
 import { act, renderHook } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("../components/ConnectModal.js", () => ({
+  ConnectModal: () => null,
+}));
+
+vi.mock("../components/SignModal.js", () => ({
+  SignModal: () => null,
+}));
 
 import { QRKitProvider, useQRKit } from "../context.js";
 
@@ -25,15 +33,49 @@ describe("QRKitProvider / useQRKit", () => {
     expect(result.current.account).toBeNull();
   });
 
-  it("sign returns a Promise", () => {
+  it("sign returns a Promise", async () => {
     const { result } = renderHook(() => useQRKit(), { wrapper });
-    const promise = result.current.sign({
-      signData: "hello",
-      address: "0xabc",
-      sourceFingerprint: undefined,
+    let promise!: Promise<unknown>;
+    await act(async () => {
+      promise = result.current.sign({
+        signData: "hello",
+        address: "0xabc",
+        sourceFingerprint: undefined,
+      });
     });
     expect(promise).toBeInstanceOf(Promise);
     // Prevent unhandled rejection
+    promise.catch(() => undefined);
+  });
+
+  it("sign accepts BTC message requests", async () => {
+    const { result } = renderHook(() => useQRKit(), { wrapper });
+    let promise!: Promise<unknown>;
+    await act(async () => {
+      promise = result.current.sign({
+        chain: "btc",
+        requestType: "message",
+        signData: "hello",
+        address: "bc1qexample",
+        scriptType: "p2wpkh",
+        sourceFingerprint: undefined,
+      });
+    });
+    expect(promise).toBeInstanceOf(Promise);
+    promise.catch(() => undefined);
+  });
+
+  it("sign accepts BTC PSBT requests", async () => {
+    const { result } = renderHook(() => useQRKit(), { wrapper });
+    let promise!: Promise<unknown>;
+    await act(async () => {
+      promise = result.current.sign({
+        chain: "btc",
+        requestType: "psbt",
+        psbt: "70736274ff01000a0200000000000000000000",
+      });
+    });
+    expect(promise).toBeInstanceOf(Promise);
     promise.catch(() => undefined);
   });
 

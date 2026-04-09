@@ -115,10 +115,30 @@
   border-style: solid;
 }
 
-.qrkit-scanner-corner.tl { top: 12px; left: 12px; border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
-.qrkit-scanner-corner.tr { top: 12px; right: 12px; border-width: 3px 3px 0 0; border-radius: 0 4px 0 0; }
-.qrkit-scanner-corner.bl { bottom: 12px; left: 12px; border-width: 0 0 3px 3px; border-radius: 0 0 0 4px; }
-.qrkit-scanner-corner.br { bottom: 12px; right: 12px; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
+.qrkit-scanner-corner.tl {
+  top: 12px;
+  left: 12px;
+  border-width: 3px 0 0 3px;
+  border-radius: 4px 0 0 0;
+}
+.qrkit-scanner-corner.tr {
+  top: 12px;
+  right: 12px;
+  border-width: 3px 3px 0 0;
+  border-radius: 0 4px 0 0;
+}
+.qrkit-scanner-corner.bl {
+  bottom: 12px;
+  left: 12px;
+  border-width: 0 0 3px 3px;
+  border-radius: 0 0 0 4px;
+}
+.qrkit-scanner-corner.br {
+  bottom: 12px;
+  right: 12px;
+  border-width: 0 3px 3px 0;
+  border-radius: 0 0 4px 0;
+}
 
 .qrkit-scanner-progress {
   position: absolute;
@@ -143,6 +163,46 @@
   font-size: 13px;
   color: var(--qrkit-text-muted);
   text-align: center;
+}
+
+/* ── Account picker ───────────────────────────────── */
+
+.qrkit-account-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.qrkit-account-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--qrkit-text-muted) 35%, transparent);
+  border-radius: calc(var(--qrkit-radius) - 4px);
+  background: transparent;
+  color: var(--qrkit-text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.qrkit-account-option:hover {
+  border-color: var(--qrkit-accent);
+}
+
+.qrkit-account-chain {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--qrkit-accent);
+}
+
+.qrkit-account-address {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  color: var(--qrkit-text);
 }
 
 /* ── QR Display ───────────────────────────────────── */

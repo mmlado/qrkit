@@ -1,7 +1,16 @@
 import { describe, it, expect } from "vitest";
 
+import { encode } from "../cbor.js";
 import { parseXpub } from "../parseXpub.js";
-import { ETH_HDKEY_UR, SOURCE_FINGERPRINT, DEVICE_NAME, urToCbor } from "./fixtures.js";
+import {
+  cryptoAccountCbor,
+  ETH_HDKEY_UR,
+  SOURCE_FINGERPRINT,
+  DEVICE_NAME,
+  MULTI_ACCOUNT_DEVICE_NAME,
+  multiAccountCbor,
+  urToCbor,
+} from "./fixtures.js";
 
 describe("parseXpub — UR crypto-hdkey", () => {
   it("parses purpose and coinType from the ETH key UR", () => {
@@ -31,6 +40,50 @@ describe("parseXpub — UR crypto-hdkey", () => {
     expect(() => parseXpub({ type: "eth-signature", cbor: new Uint8Array() })).toThrow(
       "Unsupported UR type",
     );
+  });
+});
+
+describe("parseXpub — UR crypto-multi-accounts", () => {
+  it("parses all bundled account-level xpubs", () => {
+    const parsed = parseXpub({ type: "crypto-multi-accounts", cbor: multiAccountCbor() });
+    expect(parsed).toHaveLength(4);
+    expect(parsed.map((entry) => [entry.purpose, entry.coinType])).toEqual([
+      [84, 0],
+      [49, 0],
+      [44, 0],
+      [44, 60],
+    ]);
+  });
+
+  it("uses the outer device name as a fallback", () => {
+    const parsed = parseXpub({ type: "crypto-multi-accounts", cbor: multiAccountCbor() });
+    expect(parsed[0].name).toBe(MULTI_ACCOUNT_DEVICE_NAME);
+    expect(parsed[2].name).toBe("Legacy BTC Key");
+  });
+
+  it("fails when an account entry does not contain a crypto-hdkey shape", () => {
+    const malformed = encode(
+      new Map<number, unknown>([
+        [1, SOURCE_FINGERPRINT],
+        [2, [new Map<number, unknown>([[9, "not-an-hdkey"]])]],
+        [3, MULTI_ACCOUNT_DEVICE_NAME],
+      ]),
+    );
+
+    expect(() => parseXpub({ type: "crypto-multi-accounts", cbor: malformed })).toThrow(
+      "crypto-hdkey missing key-data or chain-code",
+    );
+  });
+});
+
+describe("parseXpub — UR crypto-account", () => {
+  it("parses BTC crypto-account exports wrapped in script-expression tags", () => {
+    const parsed = parseXpub({ type: "crypto-account", cbor: cryptoAccountCbor() });
+    expect(parsed.map((entry) => [entry.purpose, entry.coinType, entry.name])).toEqual([
+      [84, 0, "GapSign"],
+      [49, 0, "GapSign"],
+      [44, 0, "GapSign"],
+    ]);
   });
 });
 

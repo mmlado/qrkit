@@ -21,6 +21,10 @@ export type {
   SignRequest,
   QRKitContextValue,
   QRKitProviderProps,
+  SignResult,
+  EvmSignRequest,
+  BtcMessageSignRequest,
+  BtcPsbtSignRequest,
 } from "./types.js";
 export type { QRScannerProps } from "./components/QRScanner.js";
 export type { QRDisplayProps } from "./components/QRDisplay.js";

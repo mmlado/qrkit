@@ -20,6 +20,26 @@ export function App() {
         <p style={{ marginBottom: "2rem", opacity: 0.6 }}>
           Airgapped wallet connection via QR codes
         </p>
+        <p style={{ marginBottom: "0.75rem", fontSize: "0.85rem", opacity: 0.55 }}>
+          Tested with{" "}
+          <a
+            href="https://get.keycard.tech/mmlado"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "inherit" }}
+          >
+            Shell
+          </a>{" "}
+          and{" "}
+          <a
+            href="https://github.com/mmlado/GapSign"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "inherit" }}
+          >
+            GapSign
+          </a>
+        </p>
         <p style={{ marginBottom: "2rem", fontSize: "0.85rem", opacity: 0.4 }}>
           <a
             href="https://github.com/mmlado/qrkit"

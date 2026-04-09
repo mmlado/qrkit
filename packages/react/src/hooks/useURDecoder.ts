@@ -21,33 +21,81 @@ export interface UseURDecoderResult {
   reset: () => void;
 }
 
+function describeUrPart(data: string): Record<string, unknown> {
+  const parts = data.split("/");
+  const type = parts[0]?.slice("ur:".length);
+  const sequence = parts.length === 3 ? parts[1] : undefined;
+  const [sequenceNumber, sequenceLength] = sequence?.split("-").map(Number) ?? [];
+
+  return {
+    type,
+    sequenceNumber,
+    sequenceLength,
+    length: data.length,
+    preview: data.slice(0, 80),
+  };
+}
+
 export function useURDecoder({ onScan }: UseURDecoderOptions): UseURDecoderResult {
   const decoderRef = useRef<UrFountainDecoder>(new UrFountainDecoder());
   const onScanRef = useRef(onScan);
+  const completedRef = useRef(false);
   const [progress, setProgress] = useState<number | null>(null);
 
   onScanRef.current = onScan;
 
   const reset = useCallback(() => {
+    console.log("[qrkit] UR decoder reset");
     decoderRef.current = new UrFountainDecoder();
+    completedRef.current = false;
     setProgress(null);
   }, []);
 
   const receivePart = useCallback(
     (data: string): boolean => {
-      if (!data.toLowerCase().startsWith("ur:")) {
+      if (completedRef.current) return true;
+
+      const normalized = data.toLowerCase();
+      if (!normalized.startsWith("ur:")) {
+        console.log("[qrkit] Non-UR scan result", {
+          length: data.length,
+          preview: data.slice(0, 80),
+        });
         return onScanRef.current(data) !== false;
       }
 
-      decoderRef.current.receivePartUr(data.toLowerCase());
-      setProgress(Math.round(decoderRef.current.estimatedPercentComplete() * 100));
+      const description = describeUrPart(normalized);
+      const accepted = decoderRef.current.receivePartUr(normalized);
+      const decodedProgress = Math.round(decoderRef.current.getProgress() * 100);
+      const estimatedProgress = Math.round(
+        decoderRef.current.estimatedPercentComplete() * 100,
+      );
+      const isComplete = decoderRef.current.isComplete();
+      setProgress(decodedProgress);
 
-      if (!decoderRef.current.isComplete()) return false;
+      console.log("[qrkit] UR frame received", {
+        ...description,
+        accepted,
+        decodedProgress,
+        estimatedProgress,
+        isComplete,
+      });
+
+      if (!isComplete) return false;
 
       const ur = decoderRef.current.resultUr;
-      const scanned: ScannedUR = { type: ur.type, cbor: ur.getPayloadCbor() };
-      if (onScanRef.current(scanned) !== false) return true;
+      const cbor = ur.getPayloadCbor();
+      console.log("[qrkit] UR complete", { type: ur.type, cborLength: cbor.length });
+      const scanned: ScannedUR = { type: ur.type, cbor };
+      if (onScanRef.current(scanned) !== false) {
+        console.log("[qrkit] Scan accepted by consumer", { type: ur.type });
+        completedRef.current = true;
+        return true;
+      }
 
+      console.log("[qrkit] Scan rejected by consumer, resetting decoder", {
+        type: ur.type,
+      });
       reset();
       return false;
     },

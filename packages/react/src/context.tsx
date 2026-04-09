@@ -19,6 +19,7 @@ import type {
   QRKitProviderProps,
   QRKitTheme,
   SignRequest,
+  SignResult,
 } from "./types.js";
 
 const QRKitContext = createContext<QRKitContextValue | null>(null);
@@ -44,7 +45,7 @@ function buildThemeStyle(theme: QRKitTheme): string {
 
 interface PendingSign {
   request: SignRequest;
-  resolve: (sig: string) => void;
+  resolve: (result: SignResult) => void;
   reject: (err: Error) => void;
 }
 
@@ -52,6 +53,7 @@ export function QRKitProvider({
   children,
   theme = {},
   appName = "qrkit",
+  chains = ["evm", "btc"],
 }: QRKitProviderProps) {
   const [account, setAccount] = useState<Account | null>(null);
   const [connectOpen, setConnectOpen] = useState(false);
@@ -77,7 +79,7 @@ export function QRKitProvider({
     setConnectOpen(false);
   }, []);
 
-  const sign = useCallback((request: SignRequest): Promise<string> => {
+  const sign = useCallback((request: SignRequest): Promise<SignResult> => {
     return new Promise((resolve, reject) => {
       const pending: PendingSign = { request, resolve, reject };
       pendingSignRef.current = pending;
@@ -85,8 +87,8 @@ export function QRKitProvider({
     });
   }, []);
 
-  const handleSign = useCallback((sig: string) => {
-    pendingSignRef.current?.resolve(sig);
+  const handleSign = useCallback((result: SignResult) => {
+    pendingSignRef.current?.resolve(result);
     pendingSignRef.current = null;
     setPendingSign(null);
   }, []);
@@ -108,6 +110,7 @@ export function QRKitProvider({
       {connectOpen &&
         createPortal(
           <ConnectModal
+            chains={chains}
             onConnect={handleConnect}
             onClose={() => setConnectOpen(false)}
           />,

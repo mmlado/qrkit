@@ -30,6 +30,8 @@ export function useQRScanner({
   const rafRef = useRef<number | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const doneRef = useRef(false);
+  const lastProcessAtRef = useRef(0);
+  const lastDetectedCodeRef = useRef<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const { receivePart, progress } = useURDecoder({ onScan });
@@ -44,6 +46,13 @@ export function useQRScanner({
 
     const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return;
+
+    const now = performance.now();
+    if (now - lastProcessAtRef.current < 100) {
+      rafRef.current = requestAnimationFrame(processFrame);
+      return;
+    }
+    lastProcessAtRef.current = now;
 
     if (video.readyState === video.HAVE_ENOUGH_DATA) {
       canvas.width = video.videoWidth;
@@ -61,8 +70,17 @@ export function useQRScanner({
       {
         const code = jsQR(imageData.data, imageData.width, imageData.height);
         if (code) {
+          if (code.data !== lastDetectedCodeRef.current) {
+            lastDetectedCodeRef.current = code.data;
+            console.log("[qrkit] QR code detected", {
+              length: code.data.length,
+              preview: code.data.slice(0, 80),
+            });
+          }
+
           const done = receivePartRef.current(code.data);
           if (done) {
+            console.log("[qrkit] QR scanner finished");
             doneRef.current = true;
             return;
           }
@@ -77,7 +95,10 @@ export function useQRScanner({
     if (!enabled || !videoRef.current) return;
 
     doneRef.current = false;
+    lastProcessAtRef.current = 0;
+    lastDetectedCodeRef.current = null;
     canvasRef.current = document.createElement("canvas");
+    console.log("[qrkit] QR scanner starting");
 
     let stream: MediaStream | null = null;
 
@@ -85,6 +106,7 @@ export function useQRScanner({
       .getUserMedia({ video: { facingMode: "environment" } })
       .then((s) => {
         stream = s;
+        console.log("[qrkit] Camera stream acquired");
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           videoRef.current.play().catch(() => {});
@@ -92,10 +114,12 @@ export function useQRScanner({
         }
       })
       .catch(() => {
+        console.warn("[qrkit] Camera access denied");
         setError("Camera access denied. Please allow camera permissions.");
       });
 
     return () => {
+      console.log("[qrkit] QR scanner stopping");
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
       stream?.getTracks().forEach((t) => t.stop());
       canvasRef.current = null;

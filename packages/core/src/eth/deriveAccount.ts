@@ -1,7 +1,8 @@
 import type { HDKey } from "@scure/bip32";
 
-import type { ParsedXpub } from "../parseXpub.js";
+import { bytesToHex } from "../bytes.js";
 import { pubKeyToEthAddress } from "./address.js";
+import type { ParsedXpub } from "../parseXpub.js";
 
 export interface DerivedAccount {
   address: string;
@@ -19,11 +20,8 @@ function firstChild(accountKey: HDKey): HDKey {
   return accountKey.deriveChild(0).deriveChild(0);
 }
 
-function toHex(bytes: Uint8Array): string {
-  return [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
-}
-
-export function deriveEvmAccount(parsed: ParsedXpub[]): DerivedAccount | undefined {
+export function deriveEvmAccount(parsed: ParsedXpub[]): DerivedAccount[] {
+  const results: DerivedAccount[] = [];
   for (const entry of parsed) {
     const { hdKey, purpose, coinType, type, sourceFingerprint, name } = entry;
     const isEvm =
@@ -34,12 +32,12 @@ export function deriveEvmAccount(parsed: ParsedXpub[]): DerivedAccount | undefin
     const child = firstChild(hdKey);
     if (!child.publicKey) continue;
 
-    return {
+    results.push({
       address: pubKeyToEthAddress(child.publicKey),
-      publicKey: toHex(child.publicKey),
+      publicKey: bytesToHex(child.publicKey),
       sourceFingerprint,
       device: name,
-    };
+    });
   }
-  return undefined;
+  return results;
 }

@@ -21,6 +21,14 @@ export interface EvmAccount {
   device: string | undefined;
 }
 
-// BtcAccount will be added here when Bitcoin support is implemented.
+export interface BtcAccount {
+  chain: "btc";
+  address: string;
+  /** BIP-44 script type implied by the derivation purpose */
+  scriptType: "p2wpkh" | "p2sh-p2wpkh" | "p2pkh";
+  publicKey: string;
+  sourceFingerprint: number | undefined;
+  device: string | undefined;
+}
 
-export type Account = EvmAccount;
+export type Account = EvmAccount | BtcAccount;
