@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.2
+
+### Patch Changes
+
+- Updated dependencies
+  - @qrkit/core@0.5.0
+
 ## 0.4.1
 
 ### Patch Changes

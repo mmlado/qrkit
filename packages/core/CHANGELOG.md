@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0
+
+### Minor Changes
+
+- Add derivationPath to EvmAccount and BtcAccount
+- Add addressIndex to QRKitConfig
+
 ## 0.4.1
 
 ### Patch Changes
