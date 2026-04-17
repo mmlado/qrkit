@@ -101,6 +101,26 @@ describe("parseConnection — chains: ['btc']", () => {
   });
 });
 
+describe("parseConnection — addressIndex", () => {
+  it("derives address index 0 by default", () => {
+    const [account] = parseConnection(scannedUR, { chains: ["evm"] });
+    expect(account.address).toBe(ETH_ADDRESS);
+    expect(account.derivationPath).toBe("m/44'/60'/0'/0/0");
+  });
+
+  it("derives a different address for addressIndex: 1", () => {
+    const [account] = parseConnection(scannedUR, { chains: ["evm"], addressIndex: 1 });
+    expect(account.address).toBe("0x19869aB36079079b8e902bd76abcAafaA3e61936");
+    expect(account.derivationPath).toBe("m/44'/60'/0'/0/1");
+  });
+
+  it("address at index 1 differs from index 0", () => {
+    const [a0] = parseConnection(scannedUR, { chains: ["evm"], addressIndex: 0 });
+    const [a1] = parseConnection(scannedUR, { chains: ["evm"], addressIndex: 1 });
+    expect(a0.address).not.toBe(a1.address);
+  });
+});
+
 describe("parseConnection — no chains config", () => {
   it("tries all chains when chains is omitted", () => {
     const accounts = parseConnection(scannedUR, {});

@@ -14,17 +14,19 @@ export interface DerivedBtcAccount {
   address: string;
   scriptType: BtcScriptType;
   publicKey: string;
+  /** BIP-44 derivation path for the derived address, e.g. "m/84'/0'/0'/0/0" */
+  derivationPath: string;
   /** source-fingerprint from the scanned xpub — required for signing */
   sourceFingerprint: number | undefined;
   /** device or key name as reported by the hardware wallet, if available */
   device: string | undefined;
 }
 
-// Derive the first external address (index 0) from an account-level xpub.
+// Derive an external address from an account-level xpub.
 // Account-level xpub is at depth 3 (m/purpose'/coin'/account').
-// External chain is child 0, then address index 0.
-function firstChild(accountKey: HDKey): HDKey {
-  return accountKey.deriveChild(0).deriveChild(0);
+// External chain is child 0, then the given address index.
+function deriveChild(accountKey: HDKey, addressIndex: number): HDKey {
+  return accountKey.deriveChild(0).deriveChild(addressIndex);
 }
 
 function scriptTypeFromPurpose(purpose: number | undefined): BtcScriptType | undefined {
@@ -40,11 +42,14 @@ function deriveAddress(pubKey: Uint8Array, scriptType: BtcScriptType): string {
   return pubKeyToP2pkh(pubKey);
 }
 
-export function deriveBtcAccount(parsed: ParsedXpub[]): DerivedBtcAccount[] {
+export function deriveBtcAccount(
+  parsed: ParsedXpub[],
+  addressIndex = 0,
+): DerivedBtcAccount[] {
   const results: DerivedBtcAccount[] = [];
 
   for (const entry of parsed) {
-    const { hdKey, purpose, coinType, sourceFingerprint, name } = entry;
+    const { hdKey, purpose, coinType, accountIndex, sourceFingerprint, name } = entry;
 
     // BTC: coin type 0
     if (coinType !== 0) continue;
@@ -52,13 +57,17 @@ export function deriveBtcAccount(parsed: ParsedXpub[]): DerivedBtcAccount[] {
     const scriptType = scriptTypeFromPurpose(purpose);
     if (!scriptType) continue;
 
-    const child = firstChild(hdKey);
+    const child = deriveChild(hdKey, addressIndex);
     if (!child.publicKey) continue;
 
+    const p = purpose;
+    const c = coinType;
+    const a = accountIndex ?? 0;
     results.push({
       address: deriveAddress(child.publicKey, scriptType),
       scriptType,
       publicKey: bytesToHex(child.publicKey),
+      derivationPath: `m/${p}'/${c}'/${a}'/0/${addressIndex}`,
       sourceFingerprint,
       device: name,
     });

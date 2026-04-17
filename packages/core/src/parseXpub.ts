@@ -12,6 +12,8 @@ export interface ParsedXpub {
   purpose: number | undefined;
   /** BIP-44 coin type: 60 = ETH, 0 = BTC */
   coinType: number | undefined;
+  /** BIP-44 account index from the origin keypath (components[4]) */
+  accountIndex: number | undefined;
   /** source-fingerprint from the origin keypath — required by Shell for signing */
   sourceFingerprint: number | undefined;
   /** device or key name from crypto-hdkey key 9, set by some wallets (e.g. Keystone) */
@@ -90,6 +92,7 @@ function parseCryptoHdKey(map: CborMap, raw: string, fallbackName?: string): Par
 
   let purpose: number | undefined;
   let coinType: number | undefined;
+  let accountIndex: number | undefined;
   let sourceFingerprint: number | undefined;
   const origin = get(map, 6);
   if (origin) {
@@ -97,6 +100,7 @@ function parseCryptoHdKey(map: CborMap, raw: string, fallbackName?: string): Par
     if (Array.isArray(components)) {
       if (components.length >= 1) purpose = components[0] as number;
       if (components.length >= 3) coinType = components[2] as number;
+      if (components.length >= 5) accountIndex = components[4] as number;
     }
     sourceFingerprint = get(origin, 2) as number | undefined;
   }
@@ -104,7 +108,16 @@ function parseCryptoHdKey(map: CborMap, raw: string, fallbackName?: string): Par
   const name = (get(map, 9) as string | undefined) ?? fallbackName;
 
   const hdKey = new HDKey({ publicKey: keyData, chainCode });
-  return { hdKey, type: "xpub", purpose, coinType, sourceFingerprint, name, raw };
+  return {
+    hdKey,
+    type: "xpub",
+    purpose,
+    coinType,
+    accountIndex,
+    sourceFingerprint,
+    name,
+    raw,
+  };
 }
 
 function parseScannedUR(scanned: ScannedUR): ParsedXpub | ParsedXpub[] {
@@ -149,6 +162,7 @@ export function parseXpub(input: ScannedUR | string): ParsedXpub[] {
       type: "xpub",
       purpose: undefined,
       coinType: undefined,
+      accountIndex: undefined,
       sourceFingerprint: undefined,
       raw: input.trim(),
     },

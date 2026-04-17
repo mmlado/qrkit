@@ -25,17 +25,18 @@ export function parseConnection(
   config: QRKitConfig = {},
 ): Account[] {
   const chains = config.chains ?? ALL_CHAINS;
+  const addressIndex = config.addressIndex ?? 0;
   const parsed = parseXpub(scannedUR);
   const accounts: Account[] = [];
 
   if (chains.includes("evm")) {
-    for (const account of deriveEvmAccount(parsed)) {
+    for (const account of deriveEvmAccount(parsed, addressIndex)) {
       accounts.push({ chain: "evm", ...account } satisfies EvmAccount);
     }
   }
 
   if (chains.includes("btc")) {
-    for (const account of deriveBtcAccount(parsed)) {
+    for (const account of deriveBtcAccount(parsed, addressIndex)) {
       accounts.push({ chain: "btc", ...account } satisfies BtcAccount);
     }
   }

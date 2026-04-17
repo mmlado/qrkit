@@ -38,4 +38,10 @@ describe("deriveEvmAccount", () => {
     const [account] = deriveEvmAccount(parsed);
     expect(account?.device).toBe(DEVICE_NAME);
   });
+
+  it("includes the BIP-44 derivation path", () => {
+    const parsed = parseXpub({ type: "crypto-hdkey", cbor: urToCbor(ETH_HDKEY_UR) });
+    const [account] = deriveEvmAccount(parsed);
+    expect(account?.derivationPath).toMatch(/^m\/\d+'\/\d+'\/0'\/0\/0$/);
+  });
 });

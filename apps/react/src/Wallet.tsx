@@ -133,6 +133,16 @@ export function Wallet() {
         <code style={{ fontSize: "0.85rem", wordBreak: "break-all" }}>
           {account.address}
         </code>
+        <div
+          style={{
+            opacity: 0.45,
+            fontSize: "0.75rem",
+            marginTop: "0.25rem",
+            fontFamily: "monospace",
+          }}
+        >
+          {account.derivationPath}
+        </div>
       </div>
 
       {account.chain === "evm" ? (
