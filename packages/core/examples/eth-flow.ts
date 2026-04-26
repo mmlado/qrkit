@@ -39,28 +39,47 @@ console.log("UR type:", scannedUR.type);
 
 // ── Step 2: Parse accounts ────────────────────────────────────────────────────
 //
+// parseConnection returns Account objects holding the account-level xpub.
 // chains: ["evm"] means BTC accounts are excluded even if the wallet exports them.
 // Use chains: ["evm", "btc"] for a multi-chain dApp.
+//
+// scannedUR is plain data — store it once and derive any address later without
+// re-scanning the QR code.
 
 const accounts = parseConnection(scannedUR, { chains: ["evm"] });
 const account = accounts.find((a): a is EvmAccount => a.chain === "evm");
 
-if (!account) {
-  console.error("No EVM account found in scanned QR");
-  process.exit(1);
-}
+if (!account) throw new Error("No EVM account found in scanned QR");
 
 console.log("\n── EVM Account ───────────────────────────────────────────────");
-console.log("Address:             ", account.address);
-console.log("Public key:          ", account.publicKey);
+console.log("Account path:        ", account.derivationPath);
+console.log("xpub:                ", account.xpub.slice(0, 20) + "...");
 console.log("Source fingerprint:  ", "0x" + account.sourceFingerprint?.toString(16));
 
-// ── Step 3: Build sign request ────────────────────────────────────────────────
+// ── Step 3: Derive addresses ──────────────────────────────────────────────────
+//
+// Call deriveAddress(index) on the account to get any address.
+// No re-scan needed -- the xpub is already in memory.
+
+const evmAccount = account;
+const address0 = evmAccount.deriveAddress(0);
+const address1 = evmAccount.deriveAddress(1);
+const address5 = evmAccount.deriveAddress(5);
+
+console.log("\n── Derived Addresses (same xpub, no re-scan) ─────────────────");
+console.log("Index 0 address:     ", address0.address);
+console.log("Index 0 path:        ", address0.derivationPath);
+console.log("Index 1 address:     ", address1.address);
+console.log("Index 1 path:        ", address1.derivationPath);
+console.log("Index 5 address:     ", address5.address);
+console.log("Index 5 path:        ", address5.derivationPath);
+
+// ── Step 4: Build sign request ────────────────────────────────────────────────
 
 const message = "Hello from qrkit!";
 const parts = buildEthSignRequestURParts({
   signData: message,
-  address: account.address,
+  address: address0.address,
   sourceFingerprint: account.sourceFingerprint,
   origin: "qrkit-example",
 });
@@ -71,7 +90,7 @@ console.log("QR parts:            ", parts.length);
 console.log("Part 0 (display as QR):");
 console.log(" ", parts[0]);
 
-// ── Step 4: Parse signature response ─────────────────────────────────────────
+// ── Step 5: Parse signature response ─────────────────────────────────────────
 //
 // In a real flow the user scans the wallet's eth-signature QR here.
 // We simulate a valid-shaped response to show the parse path.

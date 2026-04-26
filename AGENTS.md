@@ -7,6 +7,8 @@ qrkit is a TypeScript monorepo providing a generic QR connector library for airg
 ## Package Layout
 
 ```
+apps/
+  react/    @qrkit/app-react — Vite demo app for exercising React flows
 packages/
   core/     @qrkit/core    — framework-agnostic protocol logic
   react/    @qrkit/react   — React provider, hooks, drop-in components
@@ -47,6 +49,7 @@ pnpm release          # build + publish all public packages
 pnpm --filter @qrkit/core build
 pnpm --filter @qrkit/core test
 pnpm --filter @qrkit/react dev    # watch mode
+pnpm --filter @qrkit/app-react dev # run the Vite demo app
 ```
 
 ## Source Structure
@@ -66,6 +69,8 @@ packages/<name>/
 ```
 
 All public exports must go through `src/index.ts`. Do not import across packages using relative paths — use the package name (`@qrkit/core`), which resolves via `workspace:*`.
+
+`packages/react/examples/` contains example integrations that are linted by `@qrkit/react` (`eslint src examples`). Keep those examples current with the public API; they are not covered by the root formatter glob unless explicitly formatted.
 
 ## Code Style
 
@@ -120,9 +125,10 @@ The prototype implementation at `../shell_dapp_prototype/src/lib/` is the refere
 - `@qrkit/react` must never import from `wagmi` or `viem`.
 - Session state is the responsibility of `@qrkit/core`. React and wagmi layers wrap it, they do not reimplement it.
 - All QR parts (animated or single-frame) are represented as `string[]` in the core layer. Rendering is the responsibility of the React layer.
-- BTC address derivation lives in `src/btc/address.ts` and `src/btc/deriveAccount.ts`. It derives the first external child (`deriveChild(0).deriveChild(0)`) and produces P2WPKH (purpose 84, bech32), P2SH-P2WPKH (purpose 49, base58check), or P2PKH (purpose 44, base58check) addresses. Uses `@scure/base` for encoding and `@noble/hashes` for sha256/ripemd160. All further BTC-specific logic (sign requests, signature parsing, PSBT handling) must also live in `src/btc/` and must not bleed into EVM files, tests, or types. BTC and EVM code paths must remain clearly separated at all times.
+- BTC address derivation lives in `src/btc/address.ts` and `src/btc/deriveAccount.ts`. It derives `deriveChild(0).deriveChild(addressIndex)` and produces P2WPKH (purpose 84, bech32), P2SH-P2WPKH (purpose 49, base58check), or P2PKH (purpose 44, base58check) addresses. Uses `@scure/base` for encoding and `@noble/hashes` for sha256/ripemd160. All further BTC-specific logic (sign requests, signature parsing, PSBT handling) must also live in `src/btc/` and must not bleed into EVM files, tests, or types. BTC and EVM code paths must remain clearly separated at all times.
 - `crypto-multi-accounts` (BCR-2020-015) is supported in `parseXpub`. Key 2 is the accounts array (same as `crypto-account`). Key 3 is the outer device name — used as `fallbackName` for hdkey entries that don't carry key 9 themselves. `crypto-account` and `crypto-multi-accounts` both return `ParsedXpub[]`.
-- `deriveEvmAccount` returns `DerivedAccount[]` (all matching EVM entries), not just the first. `parseConnection` iterates and pushes all. Downstream consumers must handle multiple EVM accounts.
+- `deriveEvmAccount` returns `EvmAccount[]` (all matching EVM entries), not just the first. `parseConnection` iterates and pushes all. Downstream consumers must handle multiple EVM accounts.
+- Both `EvmAccount` and `BtcAccount` carry the account-level xpub and account-level `derivationPath` reconstructed from the QR origin keypath (`m/purpose'/coinType'/accountIndex'`). Call `deriveAddress(addressIndex)` to derive the external child `m/purpose'/coinType'/accountIndex'/0/addressIndex`; the last two path segments are always derived locally.
 - secp256k1 operations use `@noble/curves/secp256k1.js` (v2 API: `secp256k1.Point.fromHex(hexString).toBytes(false)`). `@noble/secp256k1` is not a dep — do not add it back.
 - `QRKitProvider` renders no wrapper DOM elements — modals portal into `document.body`, theme variables inject a `<style>` tag into `<head>`.
 - Scanning and rendering are split into two layers: batteries-included (`useQRScanner`, `useQRDisplay`) and primitive (`useURDecoder`, `useQRParts`). The primitives accept/emit raw strings and are scanner/renderer agnostic.
@@ -135,7 +141,7 @@ The prototype implementation at `../shell_dapp_prototype/src/lib/` is the refere
 
 ## Changelogs
 
-Each package has its own `CHANGELOG.md` following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format. Do not edit changelogs manually — use `pnpm changeset` to add entries, then `pnpm version-packages` to apply them.
+Each package has its own `CHANGELOG.md` following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format. Do not edit changelogs manually — use `pnpm changeset` to add entries, then `pnpm version-packages` to apply them. Prefer one changeset per affected package when the package-facing changes differ, including private workspace apps such as `@qrkit/app-react`.
 
 ## Adding a New Package
 
@@ -162,7 +168,7 @@ When the user says **"finish"**, do the following in order:
 3. **Format** — run `pnpm format` and apply changes.
 4. **Run all tests** — run `pnpm test` and confirm everything passes.
 4a. **Run the example** — run `pnpm --filter @qrkit/core example` and confirm it executes without errors.
-5. **Add a changeset** — run `pnpm changeset` and follow the prompts: select the affected packages, choose a bump type (`patch` / `minor` / `major`), and write a short summary. Do not edit `CHANGELOG.md` manually — it is generated by `pnpm version-packages`.
+5. **Add changesets** — run `pnpm changeset` and follow the prompts: select the affected packages, choose a bump type (`patch` / `minor` / `major`), and write a short summary. Use separate changeset files when package-facing changes need different descriptions. Do not edit `CHANGELOG.md` manually — it is generated by `pnpm version-packages`.
 6. **Update AGENTS.md** — if anything was added, changed, or decided that is non-obvious and useful for future sessions (new invariants, new conventions, architectural decisions), add it here.
 
 ## References

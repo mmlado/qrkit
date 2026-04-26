@@ -38,7 +38,12 @@ export function App() {
 
   const signParts =
     account?.chain === "evm"
-      ? buildEthSignRequestURParts({ signData: message, address: account.address, sourceFingerprint: account.sourceFingerprint, origin: "My dApp" })
+      ? buildEthSignRequestURParts({
+          signData: message,
+          address: account.deriveAddress(0).address,
+          sourceFingerprint: account.sourceFingerprint,
+          origin: "My dApp",
+        })
       : [];
 
   const { canvasRef: signCanvasRef, frame, total } = useQRDisplay({ parts: signParts });
@@ -88,7 +93,7 @@ export function App() {
       {screen === "done" && (
         <>
           <h2>Done</h2>
-          <p>Address: {account?.address}</p>
+          <p>Address: {account?.deriveAddress(0).address}</p>
           <p>Signature: {signature}</p>
         </>
       )}

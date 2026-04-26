@@ -13,13 +13,6 @@ export function accountTitle(account: Account): string {
   return `Bitcoin ${btcScriptTypeLabel(account.scriptType)}`;
 }
 
-export function accountDetails(account: Account): string {
-  if (account.chain === "evm") return "BIP-44  m/44'/60'/0'/0/0";
-  if (account.scriptType === "p2wpkh") return "BIP-84  m/84'/0'/0'/0/0";
-  if (account.scriptType === "p2sh-p2wpkh") return "BIP-49  m/49'/0'/0'/0/0";
-  return "BIP-44  m/44'/0'/0'/0/0";
-}
-
 export function formatSignResult(result: string | BtcSignature | CryptoPsbt): string {
   if (typeof result === "string") return result;
   if ("psbtHex" in result) return result.psbtHex;

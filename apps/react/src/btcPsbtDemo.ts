@@ -1,7 +1,7 @@
 import { ripemd160 } from "@noble/hashes/legacy.js";
 import { sha256 } from "@noble/hashes/sha2.js";
 
-import type { BtcAccount } from "@qrkit/core";
+import type { BtcDerivedAddress } from "@qrkit/core";
 
 const DUMMY_INPUT_VALUE = 100_000;
 const DUMMY_OUTPUT_VALUE = 90_000;
@@ -72,13 +72,13 @@ function reversed(bytes: Uint8Array): Uint8Array {
   return Uint8Array.from(bytes).reverse();
 }
 
-function purposeForScriptType(scriptType: BtcAccount["scriptType"]): number {
+function purposeForScriptType(scriptType: BtcDerivedAddress["scriptType"]): number {
   if (scriptType === "p2wpkh") return 84;
   if (scriptType === "p2sh-p2wpkh") return 49;
   return 44;
 }
 
-function pathBytes(account: BtcAccount): Uint8Array {
+function pathBytes(account: BtcDerivedAddress): Uint8Array {
   const hardened = 0x8000_0000;
   const path = [
     purposeForScriptType(account.scriptType) | hardened,
@@ -97,7 +97,7 @@ function p2wpkhRedeemScript(pubkeyHash: Uint8Array): Uint8Array {
   return concatBytes(Uint8Array.of(0x00, 0x14), pubkeyHash);
 }
 
-function scriptPubKey(account: BtcAccount): {
+function scriptPubKey(account: BtcDerivedAddress): {
   script: Uint8Array;
   redeemScript?: Uint8Array;
 } {
@@ -185,7 +185,7 @@ function psbtEnvelope(
 }
 
 function inputEntries(
-  account: BtcAccount,
+  account: BtcDerivedAddress,
   prevTx?: Uint8Array,
   value = DUMMY_INPUT_VALUE,
 ): Uint8Array[] {
@@ -213,7 +213,7 @@ function inputEntries(
   return entries;
 }
 
-export function buildDemoTransactionPsbt(account: BtcAccount): string {
+export function buildDemoTransactionPsbt(account: BtcDerivedAddress): string {
   const { script } = scriptPubKey(account);
   const prevTx =
     account.scriptType === "p2pkh"
@@ -242,7 +242,7 @@ export function buildDemoTransactionPsbt(account: BtcAccount): string {
   return psbtEnvelope(unsignedTx, inputEntries(account, prevTx), 1);
 }
 
-export function buildDemoBip322Psbt(account: BtcAccount): string {
+export function buildDemoBip322Psbt(account: BtcDerivedAddress): string {
   const { script } = scriptPubKey(account);
   const toSpend = serializeTx({
     version: 0,

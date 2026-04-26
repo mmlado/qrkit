@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 
 import { parseConnection } from "@qrkit/core";
-import type { Account, Chain, ScannedUR } from "@qrkit/core";
+import type { Account, Chain, DerivedAddress, ScannedUR } from "@qrkit/core";
 
 import { Modal } from "./Modal.js";
 import { QRScanner } from "./QRScanner.js";
@@ -18,9 +18,9 @@ function btcScriptTypeLabel(scriptType: "p2wpkh" | "p2sh-p2wpkh" | "p2pkh"): str
   return "Legacy";
 }
 
-function accountLabel(account: Account): string {
-  if (account.chain === "evm") return `Ethereum ${account.address}`;
-  return `Bitcoin ${btcScriptTypeLabel(account.scriptType)} ${account.address}`;
+function addressLabel(derived: DerivedAddress): string {
+  if (derived.chain === "evm") return `Ethereum ${derived.address}`;
+  return `Bitcoin ${btcScriptTypeLabel(derived.scriptType)} ${derived.address}`;
 }
 
 export function ConnectModal({
@@ -41,21 +41,25 @@ export function ConnectModal({
         const parsed = parseConnection(data as ScannedUR, { chains });
         console.log("[qrkit] Connect QR parsed", {
           accountCount: parsed.length,
-          accounts: parsed.map((account) => ({
-            chain: account.chain,
-            address: account.address,
-            device: account.device,
-            scriptType: account.chain === "btc" ? account.scriptType : undefined,
-          })),
+          accounts: parsed.map((account) => {
+            const derived = account.deriveAddress(0);
+            return {
+              chain: account.chain,
+              address: derived.address,
+              device: account.device,
+              scriptType: account.chain === "btc" ? account.scriptType : undefined,
+            };
+          }),
         });
         if (parsed.length === 0) {
           console.log("[qrkit] Connect QR had no matching accounts", { chains });
           return false;
         }
         if (parsed.length === 1) {
+          const derived = parsed[0].deriveAddress(0);
           console.log("[qrkit] Connecting single account", {
             chain: parsed[0].chain,
-            address: parsed[0].address,
+            address: derived.address,
           });
           onConnect(parsed[0]);
           return true;
@@ -77,20 +81,23 @@ export function ConnectModal({
         <>
           <p className="qrkit-step">Choose the account to connect.</p>
           <div className="qrkit-account-list">
-            {accounts.map((account) => (
-              <button
-                className="qrkit-account-option"
-                key={`${account.chain}:${account.address}:${account.publicKey}`}
-                onClick={() => onConnect(account)}
-              >
-                <span className="qrkit-account-chain">
-                  {account.chain === "evm"
-                    ? "Ethereum"
-                    : `Bitcoin ${btcScriptTypeLabel(account.scriptType)}`}
-                </span>
-                <span className="qrkit-account-address">{accountLabel(account)}</span>
-              </button>
-            ))}
+            {accounts.map((account) => {
+              const derived = account.deriveAddress(0);
+              return (
+                <button
+                  className="qrkit-account-option"
+                  key={account.xpub}
+                  onClick={() => onConnect(account)}
+                >
+                  <span className="qrkit-account-chain">
+                    {account.chain === "evm"
+                      ? "Ethereum"
+                      : `Bitcoin ${btcScriptTypeLabel(account.scriptType)}`}
+                  </span>
+                  <span className="qrkit-account-address">{addressLabel(derived)}</span>
+                </button>
+              );
+            })}
           </div>
           <button className="qrkit-btn qrkit-btn-ghost" onClick={() => setAccounts(null)}>
             Scan another QR

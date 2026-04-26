@@ -14,7 +14,7 @@ describe("deriveEvmAccount", () => {
   it("derives the correct EVM address from a real Shell device key", () => {
     const parsed = parseXpub({ type: "crypto-hdkey", cbor: urToCbor(ETH_HDKEY_UR) });
     const [account] = deriveEvmAccount(parsed);
-    expect(account?.address).toBe(ETH_ADDRESS);
+    expect(account?.deriveAddress(0).address).toBe(ETH_ADDRESS);
   });
 
   it("carries source-fingerprint through", () => {
@@ -23,10 +23,10 @@ describe("deriveEvmAccount", () => {
     expect(account?.sourceFingerprint).toBe(SOURCE_FINGERPRINT);
   });
 
-  it("exposes the compressed public key as a hex string", () => {
+  it("exposes the compressed public key as a hex string via deriveAddress", () => {
     const parsed = parseXpub({ type: "crypto-hdkey", cbor: urToCbor(ETH_HDKEY_UR) });
     const [account] = deriveEvmAccount(parsed);
-    expect(account?.publicKey).toMatch(/^[0-9a-f]{66}$/); // 33 bytes = 66 hex chars
+    expect(account?.deriveAddress(0).publicKey).toMatch(/^[0-9a-f]{66}$/);
   });
 
   it("returns an empty array for an empty input", () => {
@@ -39,9 +39,22 @@ describe("deriveEvmAccount", () => {
     expect(account?.device).toBe(DEVICE_NAME);
   });
 
-  it("includes the BIP-44 derivation path", () => {
+  it("exposes the account-level derivation path", () => {
     const parsed = parseXpub({ type: "crypto-hdkey", cbor: urToCbor(ETH_HDKEY_UR) });
     const [account] = deriveEvmAccount(parsed);
-    expect(account?.derivationPath).toMatch(/^m\/\d+'\/\d+'\/0'\/0\/0$/);
+    expect(account?.derivationPath).toMatch(/^m\/\d+'\/\d+'\/0'$/);
+  });
+
+  it("deriveAddress includes the address-level path", () => {
+    const parsed = parseXpub({ type: "crypto-hdkey", cbor: urToCbor(ETH_HDKEY_UR) });
+    const [account] = deriveEvmAccount(parsed);
+    expect(account?.deriveAddress(0).derivationPath).toMatch(/^m\/\d+'\/\d+'\/0'\/0\/0$/);
+    expect(account?.deriveAddress(1).derivationPath).toMatch(/^m\/\d+'\/\d+'\/0'\/0\/1$/);
+  });
+
+  it("deriveAddress produces different addresses for different indexes", () => {
+    const parsed = parseXpub({ type: "crypto-hdkey", cbor: urToCbor(ETH_HDKEY_UR) });
+    const [account] = deriveEvmAccount(parsed);
+    expect(account?.deriveAddress(0).address).not.toBe(account?.deriveAddress(1).address);
   });
 });

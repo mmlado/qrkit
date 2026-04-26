@@ -23,7 +23,7 @@
     "dev": "tsup --watch",
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src"
+    "lint": "eslint src examples"
   },
   "dependencies": {
     "@qrkit/bc-ur-web": "^2.0.1",

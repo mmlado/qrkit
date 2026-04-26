@@ -6,6 +6,9 @@ export type {
   Account,
   EvmAccount,
   BtcAccount,
+  DerivedAddress,
+  EvmDerivedAddress,
+  BtcDerivedAddress,
 } from "./types.js";
 export type { ParsedXpub, XpubType } from "./parseXpub.js";
 

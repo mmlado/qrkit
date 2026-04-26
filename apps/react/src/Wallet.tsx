@@ -1,13 +1,11 @@
+import { useMemo, useState } from "react";
+
+import type { BtcDerivedAddress } from "@qrkit/core";
 import { useQRKit } from "@qrkit/react";
 
 import { buildDemoBip322Psbt, buildDemoTransactionPsbt } from "./btcPsbtDemo.js";
 import { BTC_MESSAGE, BTC_SIGN_CASES, EVM_SIGN_CASES } from "./walletDemoData.js";
-import {
-  accountDetails,
-  accountTitle,
-  btcScriptTypeLabel,
-  formatSignResult,
-} from "./walletDisplay.js";
+import { accountTitle, btcScriptTypeLabel, formatSignResult } from "./walletDisplay.js";
 
 const btnBase: React.CSSProperties = {
   padding: "0.6rem 1.2rem",
@@ -30,20 +28,34 @@ const ghostBtn: React.CSSProperties = {
 
 export function Wallet() {
   const { account, connect, disconnect, sign } = useQRKit();
+  const [addressIndex, setAddressIndex] = useState(0);
+  const [indexInput, setIndexInput] = useState("0");
+
+  const derived = useMemo(
+    () => (account ? account.deriveAddress(addressIndex) : null),
+    [account, addressIndex],
+  );
+
+  function handleIndexChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const raw = e.target.value;
+    setIndexInput(raw);
+    const n = parseInt(raw, 10);
+    if (!isNaN(n) && n >= 0) setAddressIndex(n);
+  }
 
   async function handleEvmSign(
     signData: Uint8Array | string,
     dataType: number,
     chainId?: number,
   ) {
-    if (!account || account.chain !== "evm") return;
+    if (!account || account.chain !== "evm" || !derived) return;
 
     try {
       const result = await sign({
         signData,
         dataType,
         chainId,
-        address: account.address,
+        address: derived.address,
         sourceFingerprint: account.sourceFingerprint,
       });
       alert(`Signature:\n${formatSignResult(result)}`);
@@ -53,14 +65,14 @@ export function Wallet() {
   }
 
   async function handleBtcMessageSign() {
-    if (!account || account.chain !== "btc") return;
+    if (!account || account.chain !== "btc" || !derived) return;
 
     try {
       const result = await sign({
         chain: "btc",
         requestType: "message",
         signData: BTC_MESSAGE,
-        address: account.address,
+        address: derived.address,
         scriptType: account.scriptType,
         sourceFingerprint: account.sourceFingerprint,
       });
@@ -71,7 +83,7 @@ export function Wallet() {
   }
 
   async function handleBtcPsbtSign(kind: "transaction" | "bip322", title: string) {
-    if (!account || account.chain !== "btc") return;
+    if (!account || account.chain !== "btc" || !derived) return;
 
     try {
       const result = await sign({
@@ -79,8 +91,8 @@ export function Wallet() {
         requestType: "psbt",
         psbt:
           kind === "transaction"
-            ? buildDemoTransactionPsbt(account)
-            : buildDemoBip322Psbt(account),
+            ? buildDemoTransactionPsbt(derived as BtcDerivedAddress)
+            : buildDemoBip322Psbt(derived as BtcDerivedAddress),
       });
       alert(`${title}:\n${formatSignResult(result)}`);
     } catch {
@@ -88,7 +100,7 @@ export function Wallet() {
     }
   }
 
-  if (!account) {
+  if (!account || !derived) {
     return (
       <div
         style={{
@@ -125,13 +137,10 @@ export function Wallet() {
       <div style={{ textAlign: "center" }}>
         <div style={{ opacity: 0.5, fontSize: "0.8rem", marginBottom: "0.25rem" }}>
           {accountTitle(account)}
-        </div>
-        <div style={{ opacity: 0.65, fontSize: "0.8rem", marginBottom: "0.35rem" }}>
-          {accountDetails(account)}
           {account.device ? `  •  ${account.device}` : ""}
         </div>
         <code style={{ fontSize: "0.85rem", wordBreak: "break-all" }}>
-          {account.address}
+          {derived.address}
         </code>
         <div
           style={{
@@ -141,8 +150,31 @@ export function Wallet() {
             fontFamily: "monospace",
           }}
         >
-          {account.derivationPath}
+          {derived.derivationPath}
         </div>
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <label htmlFor="addr-index" style={{ fontSize: "0.85rem", opacity: 0.7 }}>
+          Address index
+        </label>
+        <input
+          id="addr-index"
+          type="number"
+          min={0}
+          value={indexInput}
+          onChange={handleIndexChange}
+          style={{
+            width: 64,
+            padding: "0.3rem 0.5rem",
+            fontSize: "0.85rem",
+            borderRadius: "6px",
+            border: "1px solid currentColor",
+            background: "transparent",
+            color: "inherit",
+            opacity: 0.8,
+          }}
+        />
       </div>
 
       {account.chain === "evm" ? (

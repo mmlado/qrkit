@@ -9,11 +9,9 @@ export interface QRKitConfig {
   /** Which chains the dApp supports. Accounts for other chains are excluded.
    *  If omitted, all supported chains are tried. */
   chains?: Chain[];
-  /** Address index to derive (the last component of the path). Defaults to 0. */
-  addressIndex?: number;
 }
 
-export interface EvmAccount {
+export interface EvmDerivedAddress {
   chain: "evm";
   address: string;
   publicKey: string;
@@ -25,7 +23,7 @@ export interface EvmAccount {
   device: string | undefined;
 }
 
-export interface BtcAccount {
+export interface BtcDerivedAddress {
   chain: "btc";
   address: string;
   /** BIP-44 script type implied by the derivation purpose */
@@ -35,6 +33,30 @@ export interface BtcAccount {
   derivationPath: string;
   sourceFingerprint: number | undefined;
   device: string | undefined;
+}
+
+export type DerivedAddress = EvmDerivedAddress | BtcDerivedAddress;
+
+export interface EvmAccount {
+  chain: "evm";
+  /** Account-level extended public key (base58), e.g. for m/44'/60'/0' */
+  xpub: string;
+  /** Account-level derivation path, e.g. "m/44'/60'/0'" */
+  derivationPath: string;
+  sourceFingerprint: number | undefined;
+  device: string | undefined;
+  /** Derive an address at the given index without re-scanning the QR. */
+  deriveAddress(addressIndex: number): EvmDerivedAddress;
+}
+
+export interface BtcAccount {
+  chain: "btc";
+  xpub: string;
+  scriptType: "p2wpkh" | "p2sh-p2wpkh" | "p2pkh";
+  derivationPath: string;
+  sourceFingerprint: number | undefined;
+  device: string | undefined;
+  deriveAddress(addressIndex: number): BtcDerivedAddress;
 }
 
 export type Account = EvmAccount | BtcAccount;

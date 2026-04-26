@@ -22,14 +22,15 @@ export function App() {
 
 function Wallet() {
   const { account, connect, disconnect, sign } = useQRKit();
+  const derived = account?.deriveAddress(0);
 
   async function handleSign() {
-    if (!account) return;
+    if (!account || account.chain !== "evm" || !derived) return;
     try {
       const sig = await sign({
-        message: "Hello from My dApp",
-        address: account.address,
-        sourceFingerprint: account.chain === "evm" ? account.sourceFingerprint : undefined,
+        signData: "Hello from My dApp",
+        address: derived.address,
+        sourceFingerprint: account.sourceFingerprint,
       });
       console.log("Signature:", sig);
     } catch {
@@ -43,7 +44,7 @@ function Wallet() {
 
   return (
     <div>
-      <p>Connected: {account.address}</p>
+      <p>Connected: {derived.address}</p>
       <button onClick={handleSign}>Sign message</button>
       <button onClick={disconnect}>Disconnect</button>
     </div>

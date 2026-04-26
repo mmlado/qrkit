@@ -14,30 +14,38 @@ const ALL_CHAINS: Chain[] = ["evm", "btc"];
 
 /**
  * Parse a connection QR (crypto-hdkey or crypto-account) and return
- * only the accounts for the chains configured in QRKitConfig.
+ * accounts for the chains configured in QRKitConfig.
+ *
+ * Each returned `Account` holds the account-level xpub and exposes
+ * `deriveAddress(addressIndex)` to derive any address without re-scanning.
  *
  * A dApp configured with `chains: ["evm"]` will never see BTC accounts,
  * and vice versa. Both chains can be enabled with `chains: ["evm", "btc"]`.
  * If `chains` is omitted, all supported chains are tried.
+ *
+ * @example
+ * const scannedUR = ...; // from camera, stored in state
+ * const [account] = parseConnection(scannedUR, { chains: ["evm"] });
+ * const address0 = account.deriveAddress(0);
+ * const address1 = account.deriveAddress(1);
  */
 export function parseConnection(
   scannedUR: ScannedUR,
   config: QRKitConfig = {},
 ): Account[] {
   const chains = config.chains ?? ALL_CHAINS;
-  const addressIndex = config.addressIndex ?? 0;
   const parsed = parseXpub(scannedUR);
   const accounts: Account[] = [];
 
   if (chains.includes("evm")) {
-    for (const account of deriveEvmAccount(parsed, addressIndex)) {
-      accounts.push({ chain: "evm", ...account } satisfies EvmAccount);
+    for (const account of deriveEvmAccount(parsed)) {
+      accounts.push(account satisfies EvmAccount);
     }
   }
 
   if (chains.includes("btc")) {
-    for (const account of deriveBtcAccount(parsed, addressIndex)) {
-      accounts.push({ chain: "btc", ...account } satisfies BtcAccount);
+    for (const account of deriveBtcAccount(parsed)) {
+      accounts.push(account satisfies BtcAccount);
     }
   }
 

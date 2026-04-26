@@ -75,17 +75,20 @@ if (!account) {
   throw new Error("No native SegWit BTC account found in scanned QR");
 }
 
+const derived = account.deriveAddress(0);
+
 console.log("\n── BTC Account ───────────────────────────────────────────────");
-console.log("Address:             ", account.address);
-console.log("Script type:         ", account.scriptType);
-console.log("Public key:          ", account.publicKey);
+console.log("Account path:        ", account.derivationPath);
+console.log("Address:             ", derived.address);
+console.log("Script type:         ", derived.scriptType);
+console.log("Public key:          ", derived.publicKey);
 console.log("Source fingerprint:  ", `0x${account.sourceFingerprint?.toString(16)}`);
 
 const message = "Hello from qrkit BTC!";
 const parts = buildBtcSignRequestURParts({
   signData: message,
-  address: account.address,
-  scriptType: account.scriptType,
+  address: derived.address,
+  scriptType: derived.scriptType,
   sourceFingerprint: account.sourceFingerprint,
   origin: "qrkit-example",
 });
@@ -103,7 +106,7 @@ fakeSignatureBytes[0] = 31; // compact Bitcoin message signature header
 crypto.getRandomValues(fakeSignatureBytes.subarray(1));
 
 const fakePublicKey = new Uint8Array(
-  account.publicKey.match(/.{2}/g)?.map((byte) => parseInt(byte, 16)) ?? [],
+  derived.publicKey.match(/.{2}/g)?.map((byte) => parseInt(byte, 16)) ?? [],
 );
 const fakeCbor = encode(
   new Map<number, unknown>([
