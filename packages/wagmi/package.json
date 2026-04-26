@@ -1,6 +1,6 @@
 {
   "name": "@qrkit/wagmi",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "private": true,
   "description": "wagmi connector adapter for QR-based airgapped wallet flows.",
   "license": "Apache-2.0",

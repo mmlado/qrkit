@@ -1,5 +1,13 @@
 # @qrkit/app-react
 
+## 0.1.3
+
+### Patch Changes
+
+- 040ed8b: Update the demo wallet to derive and display addresses by index from the connected account, including BTC PSBT signing data built from the selected derived address.
+- Updated dependencies [040ed8b]
+  - @qrkit/react@0.5.0
+
 ## 0.1.2
 
 ### Patch Changes

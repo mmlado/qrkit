@@ -1,6 +1,6 @@
 {
   "name": "@qrkit/core",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Protocol core for QR-based airgapped wallet flows — UR decoding, xpub parsing, address derivation, sign request and signature handling.",
   "license": "Apache-2.0",
   "type": "module",

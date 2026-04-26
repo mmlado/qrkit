@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.0
+
+### Major Changes
+
+- 040ed8b: BREAKING: Update connection UI, hooks examples, and signing examples to use the new account-level `deriveAddress(index)` API.
+
+### Patch Changes
+
+- Updated dependencies [040ed8b]
+  - @qrkit/core@0.6.0
+
 ## 0.4.2
 
 ### Patch Changes

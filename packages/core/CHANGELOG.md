@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0
+
+### Major Changes
+
+- 040ed8b: BREAKING: Parsed EVM and BTC accounts now expose account-level xpubs and require callers to derive concrete addresses with `deriveAddress(index)` instead of reading a single pre-derived address.
+
 ## 0.5.0
 
 ### Minor Changes
