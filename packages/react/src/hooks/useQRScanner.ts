@@ -101,24 +101,30 @@ export function useQRScanner({
     console.log("[qrkit] QR scanner starting");
 
     let stream: MediaStream | null = null;
+    let stopped = false;
 
     navigator.mediaDevices
       .getUserMedia({ video: { facingMode: "environment" } })
       .then((s) => {
+        // The cleanup may already have run, and it could not stop a stream it never saw.
+        if (stopped || !videoRef.current) {
+          s.getTracks().forEach((t) => t.stop());
+          return;
+        }
         stream = s;
         console.log("[qrkit] Camera stream acquired");
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.play().catch(() => {});
-          rafRef.current = requestAnimationFrame(processFrame);
-        }
+        videoRef.current.srcObject = stream;
+        videoRef.current.play().catch(() => {});
+        rafRef.current = requestAnimationFrame(processFrame);
       })
       .catch(() => {
+        if (stopped) return;
         console.warn("[qrkit] Camera access denied");
         setError("Camera access denied. Please allow camera permissions.");
       });
 
     return () => {
+      stopped = true;
       console.log("[qrkit] QR scanner stopping");
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
       stream?.getTracks().forEach((t) => t.stop());

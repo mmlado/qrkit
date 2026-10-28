@@ -1,4 +1,6 @@
-import { renderHook } from "@testing-library/react";
+import { createElement } from "react";
+
+import { act, render, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useQRScanner } from "../hooks/useQRScanner.js";
@@ -17,7 +19,25 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.restoreAllMocks();
 });
+
+function Scanner({ enabled }: { enabled: boolean }) {
+  const { videoRef } = useQRScanner({ onScan: vi.fn(), enabled });
+  return createElement("video", { ref: videoRef });
+}
+
+/** A camera stream that arrives only when the test resolves it. */
+function deferStream() {
+  const stop = vi.fn();
+  let resolve!: () => void;
+  vi.mocked(navigator.mediaDevices.getUserMedia).mockReturnValue(
+    new Promise<MediaStream>((done) => {
+      resolve = () => done({ getTracks: () => [{ stop }] } as unknown as MediaStream);
+    }),
+  );
+  return { stop, resolve: () => act(async () => resolve()) };
+}
 
 describe("useQRScanner", () => {
   it("returns videoRef, progress null, and error null on mount", () => {
@@ -51,5 +71,37 @@ describe("useQRScanner", () => {
 
     // Effect already ran with null ref; just verify the hook is wired correctly
     expect(result.current.error).toBeNull();
+  });
+
+  it("stops a stream that arrives after the scanner unmounted", async () => {
+    const stream = deferStream();
+    const { unmount } = render(createElement(Scanner, { enabled: true }));
+
+    unmount();
+    await stream.resolve();
+
+    expect(stream.stop).toHaveBeenCalled();
+  });
+
+  it("stops a stream that arrives after the scanner was disabled", async () => {
+    const stream = deferStream();
+    const { rerender } = render(createElement(Scanner, { enabled: true }));
+
+    rerender(createElement(Scanner, { enabled: false }));
+    await stream.resolve();
+
+    expect(stream.stop).toHaveBeenCalled();
+  });
+
+  it("keeps a stream that arrives while scanning, and stops it on unmount", async () => {
+    vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
+    const stream = deferStream();
+    const { unmount } = render(createElement(Scanner, { enabled: true }));
+
+    await stream.resolve();
+    expect(stream.stop).not.toHaveBeenCalled();
+
+    unmount();
+    expect(stream.stop).toHaveBeenCalled();
   });
 });
