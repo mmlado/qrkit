@@ -1,5 +1,14 @@
 # @qrkit/app-react
 
+## 0.1.4
+
+### Patch Changes
+
+- b97b47f: Pass the derived address's derivation path when signing EVM requests.
+- Updated dependencies [b97b47f]
+- Updated dependencies [5eefc48]
+  - @qrkit/react@0.6.0
+
 ## 0.1.3
 
 ### Patch Changes

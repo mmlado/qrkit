@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.6.0
+
+### Minor Changes
+
+- b97b47f: Add an optional `derivationPath` to `EvmSignRequest` and pass it to the eth-sign-request built by `SignModal`. The signing examples pass the derived address's path.
+
+### Patch Changes
+
+- 5eefc48: Stop the camera stream when `useQRScanner` is disabled or unmounted before the camera starts. Before, a stream that arrived after cleanup stayed on.
+- Updated dependencies [b97b47f]
+  - @qrkit/core@0.7.0
+
 ## 0.5.0
 
 ### Major Changes

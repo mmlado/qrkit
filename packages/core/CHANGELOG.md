@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.0
+
+### Minor Changes
+
+- b97b47f: Add an optional `derivationPath` to `EthSignRequestParams`. The eth-sign-request keypath uses it instead of always naming `m/44'/60'/0'/0/0`, which stays the default. An invalid path throws.
+
 ## 0.6.0
 
 ### Major Changes
