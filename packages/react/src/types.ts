@@ -31,6 +31,8 @@ export interface EvmSignRequest {
   dataType?: number;
   address: string;
   sourceFingerprint: number | undefined;
+  /** BIP-32 path of the signing key, e.g. "m/44'/60'/1'/0/0". Defaults to "m/44'/60'/0'/0/0". */
+  derivationPath?: string;
   /** Chain ID — required for LegacyTransaction (type 1) v-value encoding. */
   chainId?: number;
 }

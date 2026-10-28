@@ -122,6 +122,31 @@ describe("buildEthSignRequestUR", () => {
     expect(keypath.get(1)).toEqual([44, true, 60, true, 0, true, 0, false, 0, false]);
   });
 
+  it("encodes the given derivation path", () => {
+    const { map } = decodeSignRequestUR(
+      buildEthSignRequestUR({ ...BASE_PARAMS, derivationPath: "m/44'/60'/1'/0/2" }),
+    );
+    const keypath = map.get(5) as Map<number, unknown>;
+    expect(keypath.get(1)).toEqual([44, true, 60, true, 1, true, 0, false, 2, false]);
+  });
+
+  it("reads h as a hardened marker", () => {
+    const { map } = decodeSignRequestUR(
+      buildEthSignRequestUR({ ...BASE_PARAMS, derivationPath: "m/44h/60h/3h/0/0" }),
+    );
+    const keypath = map.get(5) as Map<number, unknown>;
+    expect(keypath.get(1)).toEqual([44, true, 60, true, 3, true, 0, false, 0, false]);
+  });
+
+  it.each(["44'/60'/0'/0/0", "m", "m/44'/x/0", "m/44''/60'", "m/2147483648"])(
+    "throws on the invalid derivation path %s",
+    (derivationPath) => {
+      expect(() => buildEthSignRequestUR({ ...BASE_PARAMS, derivationPath })).toThrow(
+        `Invalid derivation path: ${derivationPath}`,
+      );
+    },
+  );
+
   it("includes source-fingerprint in the keypath", () => {
     const { map } = decodeSignRequestUR(buildEthSignRequestUR(BASE_PARAMS));
     const keypath = map.get(5) as Map<number, unknown>;

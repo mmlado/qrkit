@@ -161,6 +161,7 @@ interface EvmSignRequest {
   dataType?: number;
   address: string;
   sourceFingerprint: number | undefined;
+  derivationPath?: string; // full path of the signing key, defaults to "m/44'/60'/0'/0/0"
   chainId?: number;
 }
 

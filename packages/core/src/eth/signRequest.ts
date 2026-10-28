@@ -18,20 +18,35 @@ export type EthDataTypeValue = (typeof EthDataType)[keyof typeof EthDataType];
 // CBOR tag for crypto-keypath
 const TAG_KEYPATH = 304;
 
+const DEFAULT_DERIVATION_PATH = "m/44'/60'/0'/0/0";
+const HARDENED_OFFSET = 0x80000000;
+
 function randomBytes(n: number): Uint8Array {
   const buf = new Uint8Array(n);
   crypto.getRandomValues(buf);
   return buf;
 }
 
+// crypto-keypath components: index, hardened, index, hardened, ...
+function parseDerivationPath(path: string): (number | boolean)[] {
+  const [root, ...segments] = path.split("/");
+  if (root !== "m" || segments.length === 0) {
+    throw new Error(`Invalid derivation path: ${path}`);
+  }
+  return segments.flatMap((segment) => {
+    const match = /^(\d+)(['h])?$/.exec(segment);
+    if (!match || Number(match[1]) >= HARDENED_OFFSET) {
+      throw new Error(`Invalid derivation path: ${path}`);
+    }
+    return [Number(match[1]), match[2] !== undefined];
+  });
+}
+
 function buildKeypath(
-  purpose: number,
-  coinType: number,
+  derivationPath: string,
   sourceFingerprint: number | undefined,
 ): CborTag {
-  // m/purpose'/coinType'/0'/0/0
-  const components = [purpose, true, coinType, true, 0, true, 0, false, 0, false];
-  const keypathMap = new Map<number, unknown>([[1, components]]);
+  const keypathMap = new Map<number, unknown>([[1, parseDerivationPath(derivationPath)]]);
   if (sourceFingerprint !== undefined) {
     keypathMap.set(2, sourceFingerprint);
   }
@@ -45,6 +60,8 @@ export interface EthSignRequestParams {
   dataType?: number;
   address: string;
   sourceFingerprint: number | undefined;
+  /** BIP-32 path of the signing key, e.g. "m/44'/60'/1'/0/0". Defaults to "m/44'/60'/0'/0/0". */
+  derivationPath?: string;
   /** Chain ID — required by the wallet for v-value encoding on LegacyTransaction (type 1). */
   chainId?: number;
   origin?: string;
@@ -56,6 +73,7 @@ function buildEthSignRequestCbor(params: EthSignRequestParams): Uint8Array {
     dataType = EthDataType.PersonalMessage,
     address,
     sourceFingerprint,
+    derivationPath = DEFAULT_DERIVATION_PATH,
     chainId,
     origin = "qrkit",
   } = params;
@@ -63,7 +81,7 @@ function buildEthSignRequestCbor(params: EthSignRequestParams): Uint8Array {
   const requestId = randomBytes(16);
   const signBytes =
     typeof signData === "string" ? new TextEncoder().encode(signData) : signData;
-  const keypath = buildKeypath(44, 60, sourceFingerprint);
+  const keypath = buildKeypath(derivationPath, sourceFingerprint);
 
   const addrHex = address.replace(/^0x/i, "");
   const addrBytes = new Uint8Array(addrHex.match(/.{2}/g)!.map((b) => parseInt(b, 16)));

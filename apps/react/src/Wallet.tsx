@@ -57,6 +57,7 @@ export function Wallet() {
         chainId,
         address: derived.address,
         sourceFingerprint: account.sourceFingerprint,
+        derivationPath: derived.derivationPath,
       });
       alert(`Signature:\n${formatSignResult(result)}`);
     } catch {

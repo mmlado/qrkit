@@ -49,6 +49,7 @@ const parts = buildEthSignRequestURParts({
   dataType: EthDataType.PersonalMessage, // defaults to PersonalMessage if omitted
   address: evm.address,
   sourceFingerprint: evm.sourceFingerprint,
+  derivationPath: "m/44'/60'/0'/0/0", // the signing key's full path; defaults to this
 });
 // parts is string[] — cycle through them to animate the QR
 

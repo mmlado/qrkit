@@ -42,6 +42,7 @@ export function App() {
           signData: message,
           address: account.deriveAddress(0).address,
           sourceFingerprint: account.sourceFingerprint,
+          derivationPath: account.deriveAddress(0).derivationPath,
           origin: "My dApp",
         })
       : [];

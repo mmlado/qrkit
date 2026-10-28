@@ -31,6 +31,7 @@ function Wallet() {
         signData: "Hello from My dApp",
         address: derived.address,
         sourceFingerprint: account.sourceFingerprint,
+        derivationPath: derived.derivationPath,
       });
       console.log("Signature:", sig);
     } catch {

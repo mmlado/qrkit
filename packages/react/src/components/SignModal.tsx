@@ -59,6 +59,7 @@ function buildParts(request: SignRequest, appName: string): string[] {
     dataType: evmRequest.dataType,
     address: evmRequest.address,
     sourceFingerprint: evmRequest.sourceFingerprint,
+    derivationPath: evmRequest.derivationPath,
     chainId: evmRequest.chainId,
     origin: appName,
   });
