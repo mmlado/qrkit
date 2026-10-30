@@ -99,6 +99,20 @@ describe("buildBtcSignRequestUR", () => {
     expect(keypath?.get(1)).toEqual([44, true, 0, true, 0, true, 0, false, 0, false]);
   });
 
+  it("encodes a custom derivation path for another account and address", () => {
+    const { map } = decodeSignRequestUR(
+      buildBtcSignRequestUR({ ...BASE_PARAMS, derivationPath: "m/84'/0'/1'/0/3" }),
+    );
+    const [keypath] = map.get(4) as Map<number, unknown>[];
+    expect(keypath?.get(1)).toEqual([84, true, 0, true, 1, true, 0, false, 3, false]);
+  });
+
+  it("rejects a malformed derivation path", () => {
+    expect(() =>
+      buildBtcSignRequestUR({ ...BASE_PARAMS, derivationPath: "84'/0'/0'/0/0" }),
+    ).toThrow("Invalid derivation path");
+  });
+
   it("includes source-fingerprint in the keypath", () => {
     const { map } = decodeSignRequestUR(buildBtcSignRequestUR(BASE_PARAMS));
     const [keypath] = map.get(4) as Map<number, unknown>[];

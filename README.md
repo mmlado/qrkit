@@ -55,14 +55,18 @@ export function App() {
 function Wallet() {
   const { account, connect, disconnect, sign } = useQRKit();
 
-  async function handleSign() {
-    if (!account) return;
+  if (!account) return <button onClick={connect}>Connect wallet</button>;
 
+  // The account holds the account-level xpub; derive any address index from it.
+  const derived = account.deriveAddress(0);
+
+  async function handleSign() {
     if (account.chain === "evm") {
       const sig = await sign({
         signData: "Hello from My dApp",
-        address: account.address,
+        address: derived.address,
         sourceFingerprint: account.sourceFingerprint,
+        derivationPath: derived.derivationPath,
       });
       console.log("EVM signature:", sig);
       return;
@@ -72,18 +76,17 @@ function Wallet() {
       chain: "btc",
       requestType: "message",
       signData: "Hello from My dApp",
-      address: account.address,
+      address: derived.address,
       scriptType: account.scriptType,
       sourceFingerprint: account.sourceFingerprint,
+      derivationPath: derived.derivationPath,
     });
     console.log("BTC signature:", sig);
   }
 
-  if (!account) return <button onClick={connect}>Connect wallet</button>;
-
   return (
     <div>
-      <p>{account.address}</p>
+      <p>{derived.address}</p>
       <button onClick={handleSign}>Sign message</button>
       <button onClick={disconnect}>Disconnect</button>
     </div>
@@ -144,19 +147,26 @@ import {
   parseBtcSignature,
   buildCryptoPsbtURParts,
   parseCryptoPsbt,
+  type BtcAccount,
+  type EvmAccount,
 } from "@qrkit/core";
 
 // Parse a connection QR from the wallet
 const accounts = parseConnection(scannedUR, { chains: ["evm", "btc"] });
-const evm = accounts.find((a) => a.chain === "evm");
-const btc = accounts.find((a) => a.chain === "btc");
+const evm = accounts.find((a): a is EvmAccount => a.chain === "evm");
+const btc = accounts.find((a): a is BtcAccount => a.chain === "btc");
 if (!evm || !btc) throw new Error("Missing account");
+
+// Accounts hold the account-level xpub; derive any address index from it
+const evmAddress = evm.deriveAddress(0);
+const btcAddress = btc.deriveAddress(0);
 
 // Build an EVM sign request — render parts as QR codes
 const evmParts = buildEthSignRequestURParts({
   signData: message,
-  address: evm.address,
+  address: evmAddress.address,
   sourceFingerprint: evm.sourceFingerprint,
+  derivationPath: evmAddress.derivationPath,
 });
 
 // Parse the wallet's signature response
@@ -165,9 +175,10 @@ const ethSignature = parseEthSignature(scannedResponseUR);
 // Build a direct BTC message sign request
 const btcParts = buildBtcSignRequestURParts({
   signData: message,
-  address: btc.address,
-  scriptType: btc.scriptType,
+  address: btcAddress.address,
+  scriptType: btcAddress.scriptType,
   sourceFingerprint: btc.sourceFingerprint,
+  derivationPath: btcAddress.derivationPath,
 });
 const btcSignature = parseBtcSignature(scannedResponseUR);
 

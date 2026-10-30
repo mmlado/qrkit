@@ -14,27 +14,45 @@ pnpm add @qrkit/core
 
 ### 1. Parse the connection QR from the wallet
 
-Scan the `crypto-hdkey`, `crypto-account`, or `crypto-multi-accounts` QR exported by the hardware wallet, then derive the accounts you need:
+Scan the `crypto-hdkey`, `crypto-account`, or `crypto-multi-accounts` QR exported by the hardware wallet, then pick the accounts you need:
 
 ```ts
-import { parseConnection } from "@qrkit/core";
+import { parseConnection, type BtcAccount, type EvmAccount } from "@qrkit/core";
 
 // scannedUR comes from a QR scanner — { type: string, cbor: Uint8Array }
 const accounts = parseConnection(scannedUR, { chains: ["evm", "btc"] });
-const evm = accounts.find((account) => account.chain === "evm");
-const btc = accounts.find((account) => account.chain === "btc");
+const evm = accounts.find((account): account is EvmAccount => account.chain === "evm");
+const btc = accounts.find((account): account is BtcAccount => account.chain === "btc");
 
-evm?.address; // EIP-55 checksummed address
-btc?.address; // BTC address, e.g. bc1q...
-btc?.scriptType; // 'p2wpkh' | 'p2sh-p2wpkh' | 'p2pkh'
+evm?.xpub; // account-level extended public key
+evm?.derivationPath; // account-level path, e.g. "m/44'/60'/0'"
 evm?.sourceFingerprint; // master key fingerprint — required for signing
+btc?.scriptType; // 'p2wpkh' | 'p2sh-p2wpkh' | 'p2pkh'
 ```
 
 `parseConnection()` can return multiple accounts from one scan, including mixed EVM and BTC results from `crypto-multi-accounts`.
 
-### 2. Build an EVM sign request
+### 2. Derive addresses
 
-Encode a message as animated UR parts to display as a QR code for the wallet to scan:
+An account holds the account-level xpub, so any address under it can be derived without scanning again:
+
+```ts
+const first = evm.deriveAddress(0);
+first.address; // EIP-55 checksummed address
+first.derivationPath; // "m/44'/60'/0'/0/0"
+
+const second = evm.deriveAddress(1); // "m/44'/60'/0'/0/1"
+
+const btcAddress = btc.deriveAddress(0);
+btcAddress.address; // BTC address, e.g. bc1q...
+btcAddress.derivationPath; // "m/84'/0'/0'/0/0"
+```
+
+`deriveAddress(index)` derives the external chain, `/0/index`, under the account path.
+
+### 3. Build an EVM sign request
+
+Encode a message as animated UR parts to display as a QR code for the wallet to scan. Pass the derived address's `derivationPath`, so the wallet signs with that address's key:
 
 ```ts
 import {
@@ -47,21 +65,22 @@ import {
 const parts = buildEthSignRequestURParts({
   signData: message, // string (UTF-8 encoded) or Uint8Array (raw bytes)
   dataType: EthDataType.PersonalMessage, // defaults to PersonalMessage if omitted
-  address: evm.address,
+  address: first.address,
   sourceFingerprint: evm.sourceFingerprint,
-  derivationPath: "m/44'/60'/0'/0/0", // the signing key's full path; defaults to this
+  derivationPath: first.derivationPath, // the signing key's full path; defaults to "m/44'/60'/0'/0/0"
 });
 // parts is string[] — cycle through them to animate the QR
 
 // Single-frame QR (short messages)
 const ur = buildEthSignRequestUR({
   signData: message,
-  address: evm.address,
+  address: first.address,
   sourceFingerprint: evm.sourceFingerprint,
+  derivationPath: first.derivationPath,
 });
 ```
 
-### 3. Parse the wallet's signature response
+### 4. Parse the wallet's signature response
 
 After the user scans the wallet's response QR, decode the signature:
 
@@ -72,7 +91,7 @@ const signature = parseEthSignature(scannedResponseUR);
 // → '0x...' hex string, ready for ethers / viem
 ```
 
-### 4. Build a BTC message sign request
+### 5. Build a BTC message sign request
 
 Direct BTC message signing uses `btc-sign-request` and returns `btc-signature`:
 
@@ -81,9 +100,10 @@ import { buildBtcSignRequestURParts, parseBtcSignature } from "@qrkit/core";
 
 const parts = buildBtcSignRequestURParts({
   signData: "Hello Bitcoin",
-  address: btc.address,
-  scriptType: btc.scriptType,
+  address: btcAddress.address,
+  scriptType: btcAddress.scriptType,
   sourceFingerprint: btc.sourceFingerprint,
+  derivationPath: btcAddress.derivationPath, // defaults to the script type's "m/purpose'/0'/0'/0/0"
 });
 
 const result = parseBtcSignature(scannedResponseUR);
@@ -91,7 +111,7 @@ result.signature; // base64 compact Bitcoin message signature (65 bytes)
 result.publicKey; // compressed public key hex
 ```
 
-### 5. Carry a BTC PSBT
+### 6. Carry a BTC PSBT
 
 Bitcoin transaction signing, and BIP-322-style message signing, use `crypto-psbt`.
 qrkit carries PSBT bytes over QR; the airgapped wallet signs offline and returns a signed `crypto-psbt`.

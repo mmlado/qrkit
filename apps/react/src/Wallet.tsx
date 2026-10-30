@@ -76,6 +76,7 @@ export function Wallet() {
         address: derived.address,
         scriptType: account.scriptType,
         sourceFingerprint: account.sourceFingerprint,
+        derivationPath: derived.derivationPath,
       });
       alert(`Signature:\n${formatSignResult(result)}`);
     } catch {

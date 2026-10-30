@@ -45,6 +45,7 @@ function buildParts(request: SignRequest, appName: string): string[] {
       address: request.address,
       scriptType: request.scriptType,
       sourceFingerprint: request.sourceFingerprint,
+      derivationPath: request.derivationPath,
       origin: appName,
     });
   }

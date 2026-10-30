@@ -1,4 +1,5 @@
 import { encode, CborTag } from "../cbor.js";
+import { buildKeypath } from "../keypath.js";
 import { encodeURParts } from "../urEncoding.js";
 
 // ERC-4527 eth-sign-request data types
@@ -15,42 +16,12 @@ export const EthDataType = {
 
 export type EthDataTypeValue = (typeof EthDataType)[keyof typeof EthDataType];
 
-// CBOR tag for crypto-keypath
-const TAG_KEYPATH = 304;
-
 const DEFAULT_DERIVATION_PATH = "m/44'/60'/0'/0/0";
-const HARDENED_OFFSET = 0x80000000;
 
 function randomBytes(n: number): Uint8Array {
   const buf = new Uint8Array(n);
   crypto.getRandomValues(buf);
   return buf;
-}
-
-// crypto-keypath components: index, hardened, index, hardened, ...
-function parseDerivationPath(path: string): (number | boolean)[] {
-  const [root, ...segments] = path.split("/");
-  if (root !== "m" || segments.length === 0) {
-    throw new Error(`Invalid derivation path: ${path}`);
-  }
-  return segments.flatMap((segment) => {
-    const match = /^(\d+)(['h])?$/.exec(segment);
-    if (!match || Number(match[1]) >= HARDENED_OFFSET) {
-      throw new Error(`Invalid derivation path: ${path}`);
-    }
-    return [Number(match[1]), match[2] !== undefined];
-  });
-}
-
-function buildKeypath(
-  derivationPath: string,
-  sourceFingerprint: number | undefined,
-): CborTag {
-  const keypathMap = new Map<number, unknown>([[1, parseDerivationPath(derivationPath)]]);
-  if (sourceFingerprint !== undefined) {
-    keypathMap.set(2, sourceFingerprint);
-  }
-  return new CborTag(TAG_KEYPATH, keypathMap);
 }
 
 export interface EthSignRequestParams {

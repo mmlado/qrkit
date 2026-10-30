@@ -37,14 +37,18 @@ export function App() {
 function Wallet() {
   const { account, connect, disconnect, sign } = useQRKit();
 
-  async function handleSign() {
-    if (!account) return;
+  if (!account) return <button onClick={connect}>Connect wallet</button>;
 
+  // The account holds the account-level xpub; derive any address index from it.
+  const derived = account.deriveAddress(0);
+
+  async function handleSign() {
     if (account.chain === "evm") {
       const sig = await sign({
         signData: "Hello from My dApp",
-        address: account.address,
+        address: derived.address,
         sourceFingerprint: account.sourceFingerprint,
+        derivationPath: derived.derivationPath,
       });
       console.log("EVM signature:", sig);
       return;
@@ -54,18 +58,17 @@ function Wallet() {
       chain: "btc",
       requestType: "message",
       signData: "Hello from My dApp",
-      address: account.address,
+      address: derived.address,
       scriptType: account.scriptType,
       sourceFingerprint: account.sourceFingerprint,
+      derivationPath: derived.derivationPath,
     });
     console.log("BTC signature:", sig);
   }
 
-  if (!account) return <button onClick={connect}>Connect wallet</button>;
-
   return (
     <div>
-      <p>{account.address}</p>
+      <p>{derived.address}</p>
       <button onClick={handleSign}>Sign message</button>
       <button onClick={disconnect}>Disconnect</button>
     </div>
@@ -172,6 +175,7 @@ interface BtcMessageSignRequest {
   address: string;
   scriptType: "p2wpkh" | "p2sh-p2wpkh" | "p2pkh";
   sourceFingerprint: number | undefined;
+  derivationPath?: string; // full path of the signing key, defaults to the script type's "m/purpose'/0'/0'/0/0"
 }
 
 interface BtcPsbtSignRequest {

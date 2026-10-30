@@ -90,6 +90,7 @@ const parts = buildBtcSignRequestURParts({
   address: derived.address,
   scriptType: derived.scriptType,
   sourceFingerprint: account.sourceFingerprint,
+  derivationPath: derived.derivationPath,
   origin: "qrkit-example",
 });
 

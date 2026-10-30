@@ -44,6 +44,8 @@ export interface BtcMessageSignRequest {
   address: string;
   scriptType: "p2wpkh" | "p2sh-p2wpkh" | "p2pkh";
   sourceFingerprint: number | undefined;
+  /** BIP-32 path of the signing key, e.g. "m/84'/0'/1'/0/0". Defaults to the script type's "m/purpose'/0'/0'/0/0". */
+  derivationPath?: string;
 }
 
 export interface BtcPsbtSignRequest {
