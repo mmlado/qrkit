@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.7.0
+
+### Minor Changes
+
+- a46a05b: Add an optional `derivationPath` to `BtcMessageSignRequest` and pass it to the btc-sign-request built by `SignModal`. The README now uses `deriveAddress(index)` in place of the removed `account.address`.
+
+### Patch Changes
+
+- Updated dependencies [a46a05b]
+  - @qrkit/core@0.8.0
+
 ## 0.6.0
 
 ### Minor Changes

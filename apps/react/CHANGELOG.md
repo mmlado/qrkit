@@ -1,5 +1,13 @@
 # @qrkit/app-react
 
+## 0.1.5
+
+### Patch Changes
+
+- a46a05b: Pass the derived address's derivation path when signing BTC messages.
+- Updated dependencies [a46a05b]
+  - @qrkit/react@0.7.0
+
 ## 0.1.4
 
 ### Patch Changes

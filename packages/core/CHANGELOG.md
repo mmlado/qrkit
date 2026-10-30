@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.0
+
+### Minor Changes
+
+- a46a05b: Add an optional `derivationPath` to `BtcSignRequestParams`. The btc-sign-request keypath uses it instead of always naming `m/purpose'/0'/0'/0/0`, which stays the default for the script type. An invalid path throws. The core README now shows the `deriveAddress(index)` API.
+
 ## 0.7.0
 
 ### Minor Changes

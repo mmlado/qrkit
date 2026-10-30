@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.0.12
+
+### Patch Changes
+
+- Updated dependencies [a46a05b]
+- Updated dependencies [a46a05b]
+  - @qrkit/core@0.8.0
+  - @qrkit/react@0.7.0
+
 ## 0.0.11
 
 ### Patch Changes
