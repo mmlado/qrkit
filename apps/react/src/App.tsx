@@ -23,7 +23,7 @@ export function App() {
         <p style={{ marginBottom: "0.75rem", fontSize: "0.85rem", opacity: 0.55 }}>
           Tested with{" "}
           <a
-            href="https://get.keycard.tech/mmlado"
+            href="https://keycard.tech/products/keycard-shell"
             target="_blank"
             rel="noopener noreferrer"
             style={{ color: "inherit" }}
