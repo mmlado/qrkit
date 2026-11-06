@@ -13,7 +13,7 @@ Generic QR connector for airgapped wallet flows. **[Live demo →](https://qrkit
 A reusable library for QR-based, airgapped wallet connection and signing flows. Built around [ERC-4527](https://eips.ethereum.org/EIPS/eip-4527) / UR / CBOR — the same protocol used by Shell and similar hardware wallets.
 
 Tested with:
-- [Shell](https://get.keycard.tech/mmlado)
+- [Shell](https://keycard.tech/products/keycard-shell)
 - [GapSign](https://github.com/mmlado/GapSign)
 
 ## Packages
